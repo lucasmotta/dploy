@@ -55,7 +55,10 @@ module.exports = class Deploy
 	setupFTP: ->
 		# Create a new instance of the FTP
 		@connection = new ftp()
-		@connection.on "error", => return console.log "Connection failed.".bold.red
+		@connection.on "error", =>
+			console.log "Connection failed.".bold.red
+			@completed.dispatch()
+			return
 		@connection.on "ready", =>
 			@connections.push @connection
 
