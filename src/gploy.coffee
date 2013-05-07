@@ -9,6 +9,7 @@ module.exports = class GPLOY
 	connection	: null
 
 	constructor: ->
+
 		if process.argv[2] == "init"
 			new Generator()
 		else
@@ -28,5 +29,5 @@ module.exports = class GPLOY
 			@connection.completed.add @deploy
 			@servers.shift()
 		else
-			console.log "All Completed".green.bold
+			console.log "All Completed :)".green.bold
 			process.exit(code=0)
