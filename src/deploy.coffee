@@ -57,7 +57,7 @@ module.exports = class Deploy
 		@connection = new ftp()
 		@connection.on "error", =>
 			console.log "Connection failed.".bold.red
-			@completed.dispatch()
+			@completed.dispatch() if @completed
 			return
 		@connection.on "ready", =>
 			@connections.push @connection
@@ -74,7 +74,6 @@ module.exports = class Deploy
 
 	setupMultipleFTP: ->
 		con = new ftp()
-		con.on "error", => return console.log "Connection failed.".bold.red
 		con.on "ready", =>
 			# Once is connected, check the revision files
 			@connections.push con
