@@ -1,0 +1,3 @@
+#!/usr/bin/env _gploy_coffee
+
+new (require '../src/gploy')
