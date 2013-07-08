@@ -1,10 +1,12 @@
 colors	= require "colors"
-ftp		= require "ftp"
 fs 		= require "fs"
 YAML 	= require "yamljs"
 Signal	= require "signals"
 exec	= require("child_process").exec
 argv 	= require("optimist").argv
+
+FTP 	= require "./ftp"
+SFTP 	= require "./sftp"
 
 
 module.exports = class Deploy
@@ -14,16 +16,25 @@ module.exports = class Deploy
 	local_hash		: null
 	remote_hash		: null
 	connection		: null
+	revisionPath 	: null
 
-	connections 	: []
-	toUpload		: []
-	toDelete		: []
-	dirCreated		: {}
+	connections 	: null
+	numConnections 	: null
+	toUpload		: null
+	toDelete		: null
+	dirCreated		: null
 
+	isConnected 	: null
 	completed 		: null
 
 	constructor: (@server = "default") ->
-		@completed = new Signal()
+		@completed		= new Signal()
+		@connections	= []
+		@numConnections	= 0
+		@toUpload		= []
+		@toDelete		= []
+		@dirCreated		= {}
+		@isConnected	= false
 
 		# Load the config file
 		fs.readFile "gploy.yaml", (error, data) =>
@@ -37,6 +48,8 @@ module.exports = class Deploy
 			unless @config
 				return console.log "Error:".bold.red, "We couldn't find the settings for " + "#{@server}".bold.red
 				process.exit(code=0)
+
+			@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
 			
 			# Call git
 			@setupGit()
@@ -54,29 +67,26 @@ module.exports = class Deploy
 
 	setupFTP: ->
 		# Create a new instance of the FTP
-		@connection = new ftp()
-		@connection.on "error", =>
-			console.log "Connection failed.".bold.red
-			@completed.dispatch() if @completed
-			return
-		@connection.on "ready", =>
+		@connection = new SFTP()
+		@connection.failed.add => return console.log "Connection failed.".bold.red unless @isConnected
+		@connection.connected.add =>
+			@isConnected = true
+			@numConnections++
 			@connections.push @connection
 
 			# Once is connected, check the revision files
 			@checkRevision()
 
 		# Connect using the config information
-		@connection.connect
-			host		: @config.host
-			port		: @config.port
-			user		: @config.user
-			password	: @config.pass
+		@connection.connect @config
+
 
 	setupMultipleFTP: ->
-		con = new ftp()
-		con.on "ready", =>
+		con = new FTP()
+		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
+			@numConnections++
 			@upload con
 
 		# Connect using the config information
@@ -86,8 +96,9 @@ module.exports = class Deploy
 			user		: @config.user
 			password	: @config.pass
 
+
 	setFolderAsCreated: (folder) =>
-		i		= folder.lastIndexOf "/"
+		i = folder.lastIndexOf "/"
 
 		return if @dirCreated[folder]
 
@@ -107,7 +118,7 @@ module.exports = class Deploy
 		@connection.get @config.path.remote + @config.revision, (error, data) =>
 			# If the file was not found, we need to create one with HEAD hash
 			if error
-				fs.writeFile @config.revision, @local_hash, (error) =>
+				fs.writeFile @revisionPath, @local_hash, (error) =>
 					return console.log "Error creating revision file.".red if error
 
 					# Since this is our first upload, we will upload our entire local tree
@@ -115,7 +126,7 @@ module.exports = class Deploy
 				return
 
 			# Update our local revision file with the HEAD hash
-			fs.writeFileSync @config.revision, @local_hash
+			fs.writeFileSync @revisionPath, @local_hash
 
 			# If the remote revision file exists, let's get it's content
 			data.on "data", (e) =>
@@ -134,11 +145,14 @@ module.exports = class Deploy
 		# We can finish the process.
 		if old_rev is new_rev
 			console.log "No diffs between local and remote :)".blue
-			return @complete()
+			return @removeConnections()
 
 		# Call git to get the tree list of the modified items
-		exec "git diff --name-status #{old_rev} #{new_rev}", (error, stdout, stderr) =>
-			return console.log "This is not a valid .git repository.".bold.red if error
+		exec "git diff --name-status #{old_rev} #{new_rev}", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
+			return console.log "This is not a valid .git repository. #{error}".bold.red if error
+
+			# Add the revision file
+			@toUpload.push name:@revisionPath
 
 			# Split the lines to get a list of items
 			files = stdout.split "\n"
@@ -148,7 +162,7 @@ module.exports = class Deploy
 				if data.length > 1
 					# The file was deleted
 					if data[0] == "D"
-						@toDelete.push name:data[1]
+						@toDelete.push name:data[1] if @canDelete data[1]
 					# Everything else
 					else
 						@toUpload.push name:data[1] if @canUpload data[1]
@@ -163,8 +177,12 @@ module.exports = class Deploy
 		console.log "Uploading files...".bold.yellow
 
 		# Call git to get the tree list of all our tracked files
-		exec "git ls-tree -r --name-only HEAD", (error, stdout, stderr) =>
+		exec "git ls-tree -r --name-only HEAD", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
 			return console.log "This is not a valid .git repository.".bold.red if error
+			
+			# Add the revision file
+			@toUpload.push name:@revisionPath
+
 			# Split the lines to get individual files
 			files = stdout.split "\n"
 			for detail in files
@@ -190,6 +208,21 @@ module.exports = class Deploy
 			else
 				return no
 		yes
+
+	# Method to check if you can delete those files or not
+	canDelete: (name) =>
+		# Return false if the name is empty
+		return no if name.length <= 0
+
+		# Check if your are settings the local path
+		if @config.path.local
+			# Check if the name of the file matchs with the local path
+			# And also ignore where the revision file is
+			if name.indexOf(@config.path.local) == 0
+				return yes
+			else
+				return no
+		yes
 			
 
 	upload: (ftp) ->
@@ -211,14 +244,13 @@ module.exports = class Deploy
 
 
 		for item in @toDelete
-			return if !item.completed
+			return console.log "todelete", item.name if !item.completed
 
 		for item in @toUpload
-			return if !item.completed
-
+			return console.log "toupload", item.name if !item.completed
 
 		# Everything is updated, we can finish the process now.
-		@complete()
+		@removeConnections()
 
 
 	# Check if the file is inside subfolders
@@ -245,7 +277,7 @@ module.exports = class Deploy
 				return
 
 			# Create the folder recursively in the server 
-			ftp.mkdir @config.path.remote + folder, true, (error) =>
+			ftp.mkdir @config.path.remote + folder, (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -274,10 +306,10 @@ module.exports = class Deploy
 			remoteName = item.name
 
 		# Set the entire remote path
-		path = @config.path.remote + remoteName
+		remote_path = @config.path.remote + remoteName
 
 		# Upload the file to the FTP
-		ftp.put item.name, path, (error) =>
+		ftp.upload item.name, remote_path, (error) =>
 			if error
 				console.log "[ + ]".blue, "Fail uploading file #{item.name}:".red, error
 				item.started = false
@@ -300,10 +332,10 @@ module.exports = class Deploy
 			remoteName = item.name
 
 		# Set the entire remote path
-		path = @config.path.remote + remoteName
+		remote_path = @config.path.remote + remoteName
 
 		# Delete the file from the server
-		ftp.delete path, (error) =>
+		ftp.delete remote_path, (error) =>
 			if error
 				console.log "[ × ]".grey, "Fail deleting file #{item.name}:".red
 			else
@@ -314,16 +346,26 @@ module.exports = class Deploy
 			# Keep uploading the rest
 			@upload ftp
 
+
+	removeConnections: =>
+		for con in @connections
+			con.closed.add =>
+				@numConnections--
+				@complete() if @numConnections == 0
+			con.close()
+
 	# Dispose the connections
 	dispose: =>
 		if @completed
+			con.dispose() for con in @connections
+
 			@completed.dispose()
 			@completed = null
 
-		con.destroy() for con in @connections
-
 	# Everything is completed.
 	complete: =>
-		console.log "Uploaded completed for ".green + "#{@server}".bold.green
-		@completed.dispatch()
+		# Delete the revision file and complete :)
+		fs.unlink @revisionPath, (err) =>
+			console.log "Uploaded completed for ".green + "#{@server}".bold.green
+			@completed.dispatch()
 

@@ -1,7 +1,7 @@
 colors	= require "colors"
 
-Deploy = require './deploy'
-Generator = require './generator'
+Deploy = require "./deploy"
+Generator = require "./generator"
 
 module.exports = class GPLOY
 

@@ -1,3 +1,25 @@
+# OS generated files #
+######################
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Node files #
+######################
 node_modules
-lib
+
+# Project files #
+######################
+*.sublime-project
+*.sublime-workspace
+gploy.yaml
+.rev
+www-dev/map/.rev
+www-built/map/.rev
+www-dev/design/.rev
+www-built/design/.rev
