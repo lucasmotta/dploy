@@ -33,7 +33,6 @@ module.exports = class SFTP
 
 	###
 	Connect to the FTP
-
 	@param config <object> Configuration file for your connection
 	###
 	connect: (config) ->
@@ -95,7 +94,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	delete: (remote_path, callback) ->
-		@connection.unlink local_path, callback
+		@connection.unlink remote_path, callback
 
 	###
 	Create a directory
@@ -104,7 +103,26 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	mkdir: (path, callback) ->
-		@connection.mkdir path, callback
+		i = path.length
+		paths = []
+		while i > 0
+			content = path.slice 0, i
+			paths.push content
+			i = content.lastIndexOf "/"
 
+		@_rmkdir paths, callback
 
-		
+	###
+	@private
+	Create directories recursively
+	###
+	_rmkdir: (paths, callback) ->
+		path = paths.pop()
+		@connection.opendir path, (error, handle) =>
+			if error
+				@connection.mkdir path, (error) =>
+					return callback.apply(this, [error]) if error or paths.length == 0
+					@_rmkdir paths, callback
+			else
+				return callback.apply(this, [undefined]) if paths.length == 0
+				@_rmkdir paths, callback
