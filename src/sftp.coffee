@@ -94,7 +94,16 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	delete: (remote_path, callback) ->
-		@connection.unlink remote_path, callback
+		@connection.unlink remote_path, (error) =>
+			callback.apply(this, [error])
+
+
+	###
+	@private
+	Delete directories recursively
+	###
+	_rdelete: (remote_path, callback) ->
+		
 
 	###
 	Create a directory
