@@ -283,9 +283,9 @@ module.exports = class Deploy
 			ftp.mkdir @config.path.remote + folder, (error) =>
 				unless @dirCreated[folder]
 					if error
-						console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
+						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
 					else
-						console.log "[ + ]".green, "Directory created: #{folder}:".green unless @dirCreated[folder]
+						# console.log "[ + ]".green, "Directory created: #{folder}:".green unless @dirCreated[folder]
 						# Set the folder as created
 						@setFolderAsCreated folder
 				

@@ -94,16 +94,35 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	delete: (remote_path, callback) ->
-		@connection.unlink remote_path, (error) =>
-			callback.apply(this, [error])
+		i = remote_path.lastIndexOf "/"
+		paths = []
+		while i > 0
+			content = remote_path.slice 0, i
+			paths.push content
+			i = content.lastIndexOf "/"
 
+		@connection.unlink remote_path, (error) =>
+			return callback.apply(this, [error]) if error
+			@_rdelete paths, callback
 
 	###
 	@private
 	Delete directories recursively
 	###
-	_rdelete: (remote_path, callback) ->
-		
+	_rdelete: (paths, callback) ->
+		path = paths.shift()
+		@connection.opendir path, (error, handle) => # Open the directory
+			return callback.apply(this, [error]) if error
+
+			@connection.readdir handle, (error, list) => # Read the directory
+				return callback.apply(this, [error]) if error or paths.length == 0 # If any errors reading the folder, just call the callback
+				if list.length <= 2 # 2 because it includes the "." and ".."
+					@connection.rmdir path, (error) => # Remove the directory if the directory is empty
+						return callback.apply(this, [error]) if error or paths.length == 0 # If any errors reading the folder, just call the callback
+						@_rdelete paths, callback # Keep cleaning the rest
+				else
+					return callback.apply(this, [error])
+
 
 	###
 	Create a directory
