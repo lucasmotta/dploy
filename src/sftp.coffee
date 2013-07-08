@@ -19,16 +19,16 @@ module.exports = class SFTP
 		@closing 	= false
 
 		# Create a new instance of the FTP
-		@connection = new ssh2()
-		@connection.on "error", => @failed.dispatch() unless @closing
-		@connection.on "close", (hadError) =>
+		@sftp = new ssh2()
+		@sftp.on "error", => @failed.dispatch() unless @closing
+		@sftp.on "close", (hadError) =>
 			if @hadError
 				@failed.dispatch() unless @closing
-		@connection.on "ready", =>
-			@connection.sftp (error, sftp) =>
+		@sftp.on "ready", =>
+			@sftp.sftp (error, connection) =>
 				return @failed.dispatch() if error
 
-				@sftp = sftp
+				@connection = connection
 				@connected.dispatch()
 
 	###
@@ -37,7 +37,7 @@ module.exports = class SFTP
 	@param config <object> Configuration file for your connection
 	###
 	connect: (config) ->
-		@connection.connect
+		@sftp.connect
 			host		: config.host
 			port		: config.port
 			username	: config.user
@@ -50,8 +50,8 @@ module.exports = class SFTP
 		return if @closing
 		@closing = true
 
-		@connection.on "end", => @closed.dispatch()
-		@connection.end()
+		@sftp.on "end", => @closed.dispatch()
+		@sftp.end()
 
 	###
 	Dispose
@@ -76,9 +76,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	get: (path, callback) ->
-		console.log "get", path
-		@sftp.readFile path, "utf-8", (error, data) =>
-			console.log error, data.toString()
+		@connection.readFile path, "utf-8", callback
 
 	###
 	Upload a file to the server
@@ -88,7 +86,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	upload: (local_path, remote_path, callback) ->
-		@connection.put local_path, remote_path, callback
+		@connection.fastPut local_path, remote_path, callback
 
 	###
 	Delete a file from the server
@@ -97,7 +95,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	delete: (remote_path, callback) ->
-		@connection.delete local_path, callback
+		@connection.unlink local_path, callback
 
 	###
 	Create a directory
@@ -106,7 +104,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	mkdir: (path, callback) ->
-		@connection.mkdir path, true, callback
+		@connection.mkdir path, callback
 
 
 		

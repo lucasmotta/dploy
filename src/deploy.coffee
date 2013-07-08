@@ -82,7 +82,7 @@ module.exports = class Deploy
 
 
 	setupMultipleFTP: ->
-		con = new FTP()
+		con = new SFTP()
 		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
@@ -129,13 +129,16 @@ module.exports = class Deploy
 			fs.writeFileSync @revisionPath, @local_hash
 
 			# If the remote revision file exists, let's get it's content
-			data.on "data", (e) =>
-				data.end()
-
-				@remote_hash = e.toString()
-
-				# Get the diff tree between the local and remote revisions 
+			if typeof data is "string"
+				@remote_hash = data
 				@checkDiff @remote_hash, @local_hash
+			else
+				data.on "data", (e) =>
+					data.end()
+					@remote_hash = e.toString()
+
+					# Get the diff tree between the local and remote revisions 
+					@checkDiff @remote_hash, @local_hash
 
 	# Get the diff tree between the local and remote revisions 
 	checkDiff: (old_rev, new_rev) ->
@@ -166,7 +169,7 @@ module.exports = class Deploy
 					# Everything else
 					else
 						@toUpload.push name:data[1] if @canUpload data[1]
-			
+						
 			# Start uploading the files
 			@upload @connection
 			i = @config.slots - 1
