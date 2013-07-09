@@ -20,6 +20,8 @@
 		"optimist"			: "0.4.x",
 		"signals"			: "1.0.x",
 		"ftp"				: "0.3.x",
-		"ssh2"				: "0.2.x"
+		"ssh2"				: "0.2.x",
+		"glob-expand" 		: "0.0.x",
+		"minimatch" 		: "0.2.x"
 	}
 }

@@ -1,8 +1,10 @@
-colors	= require "colors"
-fs 		= require "fs"
-YAML 	= require "yamljs"
-Signal	= require "signals"
-exec	= require("child_process").exec
+colors		= require "colors"
+fs			= require "fs"
+YAML		= require "yamljs"
+Signal		= require "signals"
+expand		= require "glob-expand"
+minimatch	= require "minimatch"
+exec		= require("child_process").exec
 
 FTP 	= require "./scheme/ftp"
 SFTP 	= require "./scheme/sftp"
@@ -53,7 +55,7 @@ module.exports = class Deploy
 
 			# Set the revision path
 			@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
-			
+
 			# Call git
 			@setupGit()
 
@@ -65,6 +67,8 @@ module.exports = class Deploy
 		@config.path ?= {}
 		@config.path.local ?= ""
 		@config.path.remote ?= ""
+		@config.exclude ?= []
+		@config.include ?= {}
 
 	setupGit: ->
 		console.log "Connecting to ".bold.yellow + "#{@server}".bold.underline.yellow + "...".bold.yellow
@@ -79,7 +83,7 @@ module.exports = class Deploy
 
 	setupFTP: ->
 		# Create a new instance of the FTP
-		@connection = new SFTP()
+		@connection = if @config.scheme is "sftp" then new SFTP() else new FTP()
 		@connection.failed.add => return console.log "Connection failed.".bold.red unless @isConnected
 		@connection.connected.add =>
 			@isConnected = true
@@ -94,7 +98,7 @@ module.exports = class Deploy
 
 
 	setupMultipleFTP: ->
-		con = new SFTP()
+		con = if @config.scheme is "sftp" then new SFTP() else new FTP()
 		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
@@ -159,15 +163,20 @@ module.exports = class Deploy
 		# If both revisions are the same, our job is done.
 		# We can finish the process.
 		if old_rev is new_rev
-			console.log "No diffs between local and remote :)".blue
-			return @removeConnections()
+			if @config.filter
+				@includeExtraFiles()
+				@startUploads()
+				return
+			else
+				console.log "No diffs between local and remote :)".blue
+				return @removeConnections()
 
 		# Call git to get the tree list of the modified items
 		exec "git diff --name-status #{old_rev} #{new_rev}", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
 			return console.log "This is not a valid .git repository. #{error}".bold.red if error
 
 			# Add the revision file
-			@toUpload.push name:@revisionPath
+			@toUpload.push name:@revisionPath, remote:@config.revision
 
 			# Split the lines to get a list of items
 			files = stdout.split "\n"
@@ -175,17 +184,19 @@ module.exports = class Deploy
 				# Check if the file was deleted, modified or added
 				data = detail.split "\t"
 				if data.length > 1
+					# If you set a local path, we need to replace the remote name to match the remote path
+					remoteName = if @config.path.local then data[1].split(@config.path.local).join("") else data[1]
+
 					# The file was deleted
 					if data[0] == "D"
-						@toDelete.push name:data[1] if @canDelete data[1]
+						@toDelete.push name:data[1], remote:remoteName if @canDelete data[1]
 					# Everything else
 					else
-						@toUpload.push name:data[1] if @canUpload data[1]
-						
-			# Start uploading the files
-			@upload @connection
-			i = @config.slots - 1
-			@setupMultipleFTP() while i-- > 0
+						@toUpload.push name:data[1], remote:remoteName if @canUpload data[1]
+
+			@includeExtraFiles()
+			@startUploads()
+			return
 
 	# Add the entire tree to our "toUpload" group
 	addAll: ->
@@ -196,18 +207,30 @@ module.exports = class Deploy
 			return console.log "This is not a valid .git repository.".bold.red if error
 			
 			# Add the revision file
-			@toUpload.push name:@revisionPath
+			@toUpload.push name:@revisionPath, remote:@config.revision
 
 			# Split the lines to get individual files
 			files = stdout.split "\n"
 			for detail in files
+				# If you set a local path, we need to replace the remote name to match the remote path
+				remoteName = if @config.path.local then detail.split(@config.path.local).join("") else detail
+
 				# Add them to our "toUpload" group
-				@toUpload.push name:detail if @canUpload detail
+				@toUpload.push name:detail, remote:remoteName if @canUpload detail
 			
-			# Start uploading the files
-			@upload @connection
-			i = @config.slots - 1
-			@setupMultipleFTP() while i-- > 0
+			@includeExtraFiles()
+			@startUploads()
+			return
+			
+
+	# Include extra files from the config file
+	includeExtraFiles: ->
+		for key of @config.include
+			files = expand({ filter: "isFile", cwd:process.cwd() }, key.split(" "))
+			for file in files
+				@toUpload.push name:file, remote:@config.include[key] + file
+		return
+
 
 	# Method to check if you can upload those files or not
 	canUpload: (name) =>
@@ -218,10 +241,10 @@ module.exports = class Deploy
 		if @config.path.local
 			# Check if the name of the file matchs with the local path
 			# And also ignore where the revision file is
-			if name.indexOf(@config.path.local) == 0 or name.indexOf(@config.revision) >= 0
-				return yes
-			else
-				return no
+			return no if name.indexOf(@config.path.local) < 0
+
+		return !minimatch(name, exclude) for exclude in @config.exclude
+
 		yes
 
 	# Method to check if you can delete those files or not
@@ -238,7 +261,15 @@ module.exports = class Deploy
 			else
 				return no
 		yes
-			
+	
+	startUploads: ->
+		if @toUpload.length == 0 and @toDelete.length == 0
+			console.log "No files to upload :)".blue
+			return @removeConnections()
+
+		@upload @connection
+		i = @config.slots - 1
+		@setupMultipleFTP() while i-- > 0
 
 	upload: (ftp) ->
 		# Files to delete
@@ -273,14 +304,8 @@ module.exports = class Deploy
 	addItem: (ftp, item) =>
 		item.started = true
 
-		# If you set a local path, we need to replace the remote name to match the remote path
-		if @config.path.local
-			remoteName = item.name.split(@config.path.local).join("")
-		else
-			remoteName = item.name
-
 		# Split the name to see if there's folders to create
-		nameSplit = remoteName.split "/"
+		nameSplit = item.remote.split "/"
 
 		# If there is, we will have to create the folders
 		if nameSplit.length > 1
@@ -314,14 +339,8 @@ module.exports = class Deploy
 
 	# Upload the file to the remote path
 	uploadItem: (ftp, item) =>
-		# If you set a local path, we need to replace the remote name to match the remote path
-		if @config.path.local
-			remoteName = item.name.split(@config.path.local).join("")
-		else
-			remoteName = item.name
-
 		# Set the entire remote path
-		remote_path = @config.path.remote + remoteName
+		remote_path = @config.path.remote + item.remote
 
 		# Upload the file to the FTP
 		ftp.upload item.name, remote_path, (error) =>
@@ -340,14 +359,8 @@ module.exports = class Deploy
 	deleteItem: (ftp, item) =>
 		item.started = true
 
-		# If you set a local path, we need to replace the remote name to match the remote path
-		if @config.path.local
-			remoteName = item.name.split(@config.path.local).join("")
-		else
-			remoteName = item.name
-
 		# Set the entire remote path
-		remote_path = @config.path.remote + remoteName
+		remote_path = @config.path.remote + item.remote
 
 		# Delete the file from the server
 		ftp.delete remote_path, (error) =>
