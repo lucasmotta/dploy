@@ -94,6 +94,7 @@ module.exports = class SFTP
 	@param callback: <function> Callback method
 	###
 	delete: (remote_path, callback) ->
+		# Split the path of the file
 		i = remote_path.lastIndexOf "/"
 		paths = []
 		while i > 0

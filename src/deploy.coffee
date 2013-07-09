@@ -3,10 +3,9 @@ fs 		= require "fs"
 YAML 	= require "yamljs"
 Signal	= require "signals"
 exec	= require("child_process").exec
-argv 	= require("optimist").argv
 
-FTP 	= require "./ftp"
-SFTP 	= require "./sftp"
+FTP 	= require "./scheme/ftp"
+SFTP 	= require "./scheme/sftp"
 
 
 module.exports = class Deploy
@@ -49,10 +48,23 @@ module.exports = class Deploy
 				return console.log "Error:".bold.red, "We couldn't find the settings for " + "#{@server}".bold.red
 				process.exit(code=0)
 
+			# Setup the default configuration
+			@setupDefaultConfig()
+
+			# Set the revision path
 			@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
 			
 			# Call git
 			@setupGit()
+
+	setupDefaultConfig: ->
+		@config.scheme ?= "ftp" 
+		@config.port ?= (if @config.scheme is "ftp" then 21 else 22)
+		@config.slots ?= 1
+		@config.revision ?= ".rev"
+		@config.path ?= {}
+		@config.path.local ?= ""
+		@config.path.remote ?= ""
 
 	setupGit: ->
 		console.log "Connecting to ".bold.yellow + "#{@server}".bold.underline.yellow + "...".bold.yellow

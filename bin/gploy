@@ -1,3 +1,5 @@
-#!/usr/bin/env _gploy_coffee
-
-new (require '../src/gploy')
+#!/usr/bin/env node
+var path = require('path');
+var fs = require('fs');
+var lib = path.join(path.dirname(fs.realpathSync(__filename)), "../lib");
+new (require(lib + "/gploy.js"));

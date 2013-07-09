@@ -8,6 +8,8 @@ module.exports = class Generator
 
 	constructor: ->
 
+		# Generate the content of the post-commit hook
+		# TODO Create from an external file
 		content	= '#!/bin/bash' + '\n\n'
 		content	+= 'message=$(git log -1 --all --pretty=%B)' + '\n'
 		content	+= 'tag="#gploy"' + '\n'
@@ -17,8 +19,8 @@ module.exports = class Generator
 		content	+= '\teval $noTag' + '\n'
 		content	+= 'fi'
 
-		fs.writeFile @fileName, content, (error) =>
-			return console.log "Error:".bold.red, "We couldn't create the post-commit file. Check the permissions of the folder.".red if error
+		fs.writeFile @fileName, content, (error) ->
+			return console.log "Error:".bold.red, "The post-commit file could not be created. Check the permissions of the folder.".red if error
 
-			fs.chmod @fileName, "0755", (error) =>
-				console.log "Done!".bold.green + " Your project is ready to #gploy :) ".green
+			fs.chmod @fileName, "0755", (error) ->
+				return console.log "Done!".bold.green + " Your project is ready to #gploy :) ".green

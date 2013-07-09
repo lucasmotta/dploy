@@ -15,11 +15,4 @@ node_modules
 
 # Project files #
 ######################
-*.sublime-project
-*.sublime-workspace
-gploy.yaml
-.rev
-www-dev/map/.rev
-www-built/map/.rev
-www-dev/design/.rev
-www-built/design/.rev
+lib
