@@ -1,5 +1,5 @@
-# Nailing the deployment to FTP and SFTP using git
-**GPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP
+**GPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.  
+It uses **git** to upload only the files that were modified since the last deploy. AWESOME STUFF.
 
 ## Install
 ```
@@ -19,7 +19,7 @@ Will deploy the first environment that you have on your `gploy.yaml`
 Will install the `gploy.yaml` file and set up a `post-commit` script on your `.git/hooks` folder so you can _GPLOY_ from your commit message as well.
 
 ### gploy …rest
-Anything else after the `gploy` command will be processed as an environment,like this:  
+Anything else after the `gploy` command will be processed as an environment, like this:  
   
 ```
 gploy dev stage production
