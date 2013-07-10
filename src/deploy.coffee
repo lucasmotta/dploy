@@ -13,6 +13,7 @@ SFTP 	= require "./scheme/sftp"
 module.exports = class Deploy
 
 	server 			: null
+	ignoreInclude	: null
 
 	local_hash		: null
 	remote_hash		: null
@@ -28,7 +29,7 @@ module.exports = class Deploy
 	isConnected 	: null
 	completed 		: null
 
-	constructor: (@server = "default") ->
+	constructor: (@server, @ignoreInclude = false) ->
 		@completed		= new Signal()
 		@connections	= []
 		@numConnections	= 0
@@ -44,8 +45,14 @@ module.exports = class Deploy
 				process.exit(code=0)
 
 			# Set the config file based on the arguments
-			# If no arguments were found, use the "default" setup
-			@config = YAML.parse(data.toString())[@server]
+			# If no arguments were found, use the first environment on the file
+			yaml = YAML.parse(data.toString())
+			unless @server
+				for key of yaml
+					@server = key
+					break
+
+			@config = yaml[@server]
 			unless @config
 				return console.log "Error:".bold.red, "We couldn't find the settings for " + "#{@server}".bold.red
 				process.exit(code=0)
@@ -163,7 +170,7 @@ module.exports = class Deploy
 		# If both revisions are the same, our job is done.
 		# We can finish the process.
 		if old_rev is new_rev
-			if @config.filter
+			if @config.include
 				@includeExtraFiles()
 				@startUploads()
 				return
@@ -225,11 +232,13 @@ module.exports = class Deploy
 
 	# Include extra files from the config file
 	includeExtraFiles: ->
+		return false if @ignoreInclude
+
 		for key of @config.include
 			files = expand({ filter: "isFile", cwd:process.cwd() }, key.split(" "))
 			for file in files
 				@toUpload.push name:file, remote:@config.include[key] + file
-		return
+		return true
 
 
 	# Method to check if you can upload those files or not
@@ -394,6 +403,6 @@ module.exports = class Deploy
 	complete: =>
 		# Delete the revision file and complete :)
 		fs.unlink @revisionPath, (err) =>
-			console.log "Uploaded completed for ".green + "#{@server}".bold.green
+			console.log "Upload completed for ".green + "#{@server}".bold.green
 			@completed.dispatch()
 
