@@ -22,6 +22,7 @@
 		"ftp"				: "0.3.x",
 		"ssh2"				: "0.2.x",
 		"glob-expand" 		: "0.0.x",
-		"minimatch" 		: "0.2.x"
+		"minimatch" 		: "0.2.x",
+		"prompt" 			: "0.2.x"
 	}
 }

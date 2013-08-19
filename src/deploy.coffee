@@ -4,6 +4,7 @@ YAML		= require "yamljs"
 Signal		= require "signals"
 expand		= require "glob-expand"
 minimatch	= require "minimatch"
+prompt		= require "prompt"
 exec		= require("child_process").exec
 
 FTP 	= require "./scheme/ftp"
@@ -172,7 +173,7 @@ module.exports = class Deploy
 		if old_rev is new_rev
 			if @config.include
 				@includeExtraFiles()
-				@startUploads()
+				if @config.check then @askBeforeUpload() else @startUploads()
 				return
 			else
 				console.log "No diffs between local and remote :)".blue
@@ -202,7 +203,7 @@ module.exports = class Deploy
 						@toUpload.push name:data[1], remote:remoteName if @canUpload data[1]
 
 			@includeExtraFiles()
-			@startUploads()
+			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 
 	# Add the entire tree to our "toUpload" group
@@ -226,7 +227,7 @@ module.exports = class Deploy
 				@toUpload.push name:detail, remote:remoteName if @canUpload detail
 			
 			@includeExtraFiles()
-			@startUploads()
+			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 			
 
@@ -271,6 +272,33 @@ module.exports = class Deploy
 				return no
 		yes
 	
+	askBeforeUpload: ->
+		scheme = properties:
+			answer:
+				pattern: /y|n|Y|N/
+				description: "Are you sure you want to upload those files?".bold.red
+				message: "The answer should be YES (y) or NO (y)."
+				required: true
+
+		if @toDelete.length
+			console.log "Files that will be deleted:".bold.red
+			console.log "- #{file.name}".red for file in @toDelete
+
+		if @toUpload.length
+			console.log "Files that will be uploaded:".bold.blue
+			console.log "- #{file.name}".blue for file in @toUpload
+
+		prompt.message = "Question"
+
+		prompt.start()
+		prompt.get scheme, (error, result) =>
+			if result.answer.toLowerCase() == "y"
+				@startUploads()
+			else
+				console.log "Upload aborted by the user.".red
+				return @complete(false)
+
+
 	startUploads: ->
 		if @toUpload.length == 0 and @toDelete.length == 0
 			console.log "No files to upload :)".blue
@@ -400,9 +428,9 @@ module.exports = class Deploy
 			@completed = null
 
 	# Everything is completed.
-	complete: =>
+	complete: (displayMessage = true) =>
 		# Delete the revision file and complete :)
 		fs.unlink @revisionPath, (err) =>
-			console.log "Upload completed for ".green + "#{@server}".bold.green
+			console.log "Upload completed for ".green + "#{@server}".bold.green if displayMessage
 			@completed.dispatch()
 

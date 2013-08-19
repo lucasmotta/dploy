@@ -24,9 +24,9 @@ Anything else after the `gploy` command will be processed as an environment, lik
 ```
 gploy dev stage production
 ```  
-_GPLOY_ will expect to find **dev**, **stage** and **production** configs on your `gploy.yaml` file.
+In this case _GPLOY_ will expect to find **dev**, **stage** and **production** configs on your `gploy.yaml` file.
 
-## Basic Example
+## Basic example
 If you only have one server, just name whatever you want and call `gploy`.   
 
 ```
@@ -112,8 +112,8 @@ Exclude files that are tracked by git, but that you don't want on your server. Y
 * Type: `Object`  
 * Default: `none`    
 
-The **include** parameter is similar to the **exclude**, but different (há!). To start, it include files instead of excluding (doh). And you also have to set an object instead of an array.  
-The **key** of your object is what *GPLOY* is gonna search locally and the **value** of your object is the path in the remote server. Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
+The **include** parameter is similar to the **exclude**. But instead of an array, it expects an object.  
+The **key** of your object is what *GPLOY* is gonna search locally and the **value** of your object is the path of the remote server. Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
 
 ```
 include:
@@ -137,7 +137,7 @@ gploy stage -i
 ```
 
 
-## Multiple Environments
+## Multiple environments
 Most of the times we have to work on different environments (dev, stage, production…).  
 With _GPLOY_ is really easy to make multiple deploys using a single command. All you need to do is create different configurations on your `gploy.yaml` file, like this:
 
