@@ -1,5 +1,5 @@
 **GPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.  
-It uses **git** to upload only the files that were modified since the last deploy. AWESOME STUFF.
+It uses **git** to upload only the files that were modified since the last deploy – **HOT STUFF**.
 
 ## Install
 ```
@@ -19,7 +19,7 @@ Will deploy the first environment that you have on your `gploy.yaml`
 Will install the `gploy.yaml` file and set up a `post-commit` script on your `.git/hooks` folder so you can _GPLOY_ from your commit message as well.
 
 ### gploy …rest
-Anything else after the `gploy` command will be processed as an environment, like this:  
+Anything else after the `gploy` command will be used as an environment, like this:  
   
 ```
 gploy dev stage production
@@ -27,7 +27,7 @@ gploy dev stage production
 In this case _GPLOY_ will expect to find **dev**, **stage** and **production** configs on your `gploy.yaml` file.
 
 ## Basic example
-If you only have one server, just name whatever you want and call `gploy`.   
+If you only have one server, just name whatever you want and run `gploy`.   
 
 ```
 awesome:
@@ -44,7 +44,8 @@ Deploying on the command line:
 ```
 gploy
 ```
-Or the same thing specifying the environment:  
+
+You can also set the environment that you want to upload:  
   
 ```
 gploy awesome
@@ -86,6 +87,18 @@ To check the different between your local files and what's on the server, we hav
 * Default: `1`  
 
 To make the upload faster, you can create multiple connections to your server.
+
+### check
+* Type: `Boolean`  
+* Default: `false`  
+
+If you set this parameter to `true`, you will be prompted to confirm the list of files before the actual action.
+
+### branch
+* Type: `String` or `Array`  
+* Default: `none`  
+
+You can set a list of branches that are allowed to deploy to your server. This will also help you to avoid mistaken uploads to different servers.
 
 ### path.local
 * Type: `String`  

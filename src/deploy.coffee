@@ -65,8 +65,9 @@ module.exports = class Deploy
 			@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
 
 			# Call git
-			@setupGit()
+			@checkBranch()
 
+	# Set the default config
 	setupDefaultConfig: ->
 		@config.scheme ?= "ftp" 
 		@config.port ?= (if @config.scheme is "ftp" then 21 else 22)
@@ -78,19 +79,39 @@ module.exports = class Deploy
 		@config.exclude ?= []
 		@config.include ?= {}
 
+
+	# Check if the branch you are working on can be deployed to that server
+	checkBranch: ->
+		@setupGit() unless @config.branch
+
+		@config.branch = [@config.branch] if typeof @config.branch is "string"
+
+		exec "git rev-parse --abbrev-ref HEAD", (error, stdout, stderr) =>
+			return console.log "This is not a valid .git repository.".bold.red if error
+			currentBranch = stdout.replace /\s/g,''
+
+			for branch in @config.branch
+				if currentBranch is branch
+					return @setupGit()
+
+			console.log "Error: ".red.bold + "You are not allowed to deploy from ".red + "#{currentBranch}".bold.underline.red + " to ".red + "#{@server}".bold.underline.red
+			@removeConnections(false)
+
+
+	# Get the HEAD hash id so we can compare to the hash on the server
 	setupGit: ->
 		console.log "Connecting to ".bold.yellow + "#{@server}".bold.underline.yellow + "...".bold.yellow
 
-		# Get the HEAD hash id so we can compare to the hash on the server
 		exec "git log --pretty=format:'%H' -n 1", (error, stdout, stderr) =>
 			return console.log "This is not a valid .git repository.".bold.red if error
 			@local_hash	= stdout
 
-			# Call the FTP
-			@setupFTP()
+			# Call the server
+			@setupServer()
 
-	setupFTP: ->
-		# Create a new instance of the FTP
+	# Connect to your server
+	setupServer: ->
+		# Create a new instance of your server based on the scheme
 		@connection = if @config.scheme is "sftp" then new SFTP() else new FTP()
 		@connection.failed.add => return console.log "Connection failed.".bold.red unless @isConnected
 		@connection.connected.add =>
@@ -104,8 +125,8 @@ module.exports = class Deploy
 		# Connect using the config information
 		@connection.connect @config
 
-
-	setupMultipleFTP: ->
+	# Create more connections of your server
+	setupMultipleServers: ->
 		con = if @config.scheme is "sftp" then new SFTP() else new FTP()
 		con.connected.add =>
 			# Once is connected, check the revision files
@@ -273,20 +294,22 @@ module.exports = class Deploy
 		yes
 	
 	askBeforeUpload: ->
+		return unless @hasFilesToUpload() 
+
 		scheme = properties:
 			answer:
 				pattern: /y|n|Y|N/
-				description: "Are you sure you want to upload those files?".bold.red
+				description: "Are you sure you want to upload those files?".bold.red + " (y/n)"
 				message: "The answer should be YES (y) or NO (y)."
 				required: true
 
 		if @toDelete.length
 			console.log "Files that will be deleted:".bold.red
-			console.log "- #{file.name}".red for file in @toDelete
+			console.log("[ ? ]".grey, "#{file.name}".red) for file in @toDelete
 
 		if @toUpload.length
 			console.log "Files that will be uploaded:".bold.blue
-			console.log "- #{file.name}".blue for file in @toUpload
+			console.log("[ ? ]".blue, "#{file.name}".blue) for file in @toUpload
 
 		prompt.message = "Question"
 
@@ -296,25 +319,30 @@ module.exports = class Deploy
 				@startUploads()
 			else
 				console.log "Upload aborted by the user.".red
-				return @complete(false)
+				@removeConnections(false)
 
 
 	startUploads: ->
-		if @toUpload.length == 0 and @toDelete.length == 0
-			console.log "No files to upload :)".blue
-			return @removeConnections()
+		return unless @hasFilesToUpload() 
 
 		@upload @connection
 		i = @config.slots - 1
-		@setupMultipleFTP() while i-- > 0
+		@setupMultipleServers() while i-- > 0
 
-	upload: (ftp) ->
+	hasFilesToUpload: ->
+		if @toUpload.length == 0 and @toDelete.length == 0
+			console.log "No files to upload".blue
+			@removeConnections()
+			return false
+		return true
+
+	upload: (server) ->
 		# Files to delete
 		if @toDelete.length
 			# We loop between all the files that we need to delete until they are all done.
 			for item in @toDelete
 				unless item.started
-					@deleteItem ftp, item
+					@deleteItem server, item
 					return
 
 		# Files to upload
@@ -322,7 +350,7 @@ module.exports = class Deploy
 			# We loop between all files that wee need to upload until they are all done
 			for item in @toUpload
 				unless item.started
-					@addItem ftp, item
+					@addItem server, item
 					return
 
 
@@ -338,7 +366,7 @@ module.exports = class Deploy
 
 	# Check if the file is inside subfolders
 	# If it's is, create the folders first and then upload the file.
-	addItem: (ftp, item) =>
+	addItem: (server, item) =>
 		item.started = true
 
 		# Split the name to see if there's folders to create
@@ -350,11 +378,11 @@ module.exports = class Deploy
 			folder = nameSplit.join("/")
 
 			if @dirCreated[folder]
-				@uploadItem ftp, item
+				@uploadItem server, item
 				return
 
 			# Create the folder recursively in the server 
-			ftp.mkdir @config.path.remote + folder, (error) =>
+			server.mkdir @config.path.remote + folder, (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -365,22 +393,22 @@ module.exports = class Deploy
 				
 				if error
 					item.started = false
-					@upload ftp
+					@upload server
 				else
 					# Upload the file once the folder is created
-					@uploadItem ftp, item
+					@uploadItem server, item
 
 		else
 			# No folders need to be created, so we just upload the file
-			@uploadItem ftp, item
+			@uploadItem server, item
 
 	# Upload the file to the remote path
-	uploadItem: (ftp, item) =>
+	uploadItem: (server, item) =>
 		# Set the entire remote path
 		remote_path = @config.path.remote + item.remote
 
-		# Upload the file to the FTP
-		ftp.upload item.name, remote_path, (error) =>
+		# Upload the file to the server
+		server.upload item.name, remote_path, (error) =>
 			if error
 				console.log "[ + ]".blue, "Fail uploading file #{item.name}:".red, error
 				item.started = false
@@ -390,17 +418,17 @@ module.exports = class Deploy
 				item.completed = true
 
 			# Keep uploading the rest
-			@upload ftp
+			@upload server
 
 	# Delete an item from the remote server
-	deleteItem: (ftp, item) =>
+	deleteItem: (server, item) =>
 		item.started = true
 
 		# Set the entire remote path
 		remote_path = @config.path.remote + item.remote
 
 		# Delete the file from the server
-		ftp.delete remote_path, (error) =>
+		server.delete remote_path, (error) =>
 			if error
 				console.log "[ × ]".grey, "Fail deleting file #{item.name}:".red
 			else
@@ -409,15 +437,18 @@ module.exports = class Deploy
 			item.completed = true
 
 			# Keep uploading the rest
-			@upload ftp
+			@upload server
 
 
-	removeConnections: =>
-		for con in @connections
-			con.closed.add =>
-				@numConnections--
-				@complete() if @numConnections == 0
-			con.close()
+	removeConnections: (displayMessage = true) =>
+		if @numConnections > 0
+			for con in @connections
+				con.closed.add =>
+					@numConnections--
+					@complete(displayMessage) if @numConnections == 0
+				con.close()
+		else
+			@complete(displayMessage)
 
 	# Dispose the connections
 	dispose: =>
@@ -428,9 +459,9 @@ module.exports = class Deploy
 			@completed = null
 
 	# Everything is completed.
-	complete: (displayMessage = true) =>
+	complete: (displayMessage) =>
 		# Delete the revision file and complete :)
 		fs.unlink @revisionPath, (err) =>
-			console.log "Upload completed for ".green + "#{@server}".bold.green if displayMessage
+			console.log "Upload completed for ".green + "#{@server}".bold.underline.green if displayMessage
 			@completed.dispatch()
 
