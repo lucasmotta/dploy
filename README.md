@@ -98,7 +98,8 @@ If you set this parameter to `true`, you will be prompted to confirm the list of
 * Type: `String` or `Array`  
 * Default: `none`  
 
-You can set a list of branches that are allowed to deploy to your server. This will also help you to avoid mistaken uploads to different servers.
+You can set a list of branches that are allowed to deploy to your server. This will also help you to avoid accidental uploads to different servers.  
+Note that you can also set a string (a single branch), rather than a list.
 
 ### path.local
 * Type: `String`  
