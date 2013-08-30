@@ -82,7 +82,7 @@ module.exports = class Deploy
 
 	# Check if the branch you are working on can be deployed to that server
 	checkBranch: ->
-		@setupGit() unless @config.branch
+		return @setupGit() unless @config.branch
 
 		@config.branch = [@config.branch] if typeof @config.branch is "string"
 
