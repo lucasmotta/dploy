@@ -1,0 +1,320 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Gploy by LeanMeanFightingMachine</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Gploy</h1>
+        <p>Nailing the deployment to FTP and SFTP using git</p>
+
+        <p class="view"><a href="https://github.com/LeanMeanFightingMachine/gploy">View the Project on GitHub <small>LeanMeanFightingMachine/gploy</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/LeanMeanFightingMachine/gploy/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/LeanMeanFightingMachine/gploy/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/LeanMeanFightingMachine/gploy">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p><strong>GPLOY</strong> is a tool made in <strong>node.js</strong> that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.<br>
+It uses <strong>git</strong> to upload only the files that were modified since the last deploy – <strong>HOT STUFF</strong>.</p>
+
+<h2>
+<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
+
+<pre><code>npm install gploy -g
+</code></pre>
+
+<h2>
+<a name="help" class="anchor" href="#help"><span class="octicon octicon-link"></span></a>Help</h2>
+
+<pre><code>gploy --help
+</code></pre>
+
+<h2>
+<a name="commands" class="anchor" href="#commands"><span class="octicon octicon-link"></span></a>Commands</h2>
+
+<h3>
+<a name="gploy" class="anchor" href="#gploy"><span class="octicon octicon-link"></span></a>gploy</h3>
+
+<p>Will deploy the first environment that you have on your <code>gploy.yaml</code></p>
+
+<h3>
+<a name="gploy-install" class="anchor" href="#gploy-install"><span class="octicon octicon-link"></span></a>gploy install</h3>
+
+<p>Will install the <code>gploy.yaml</code> file and set up a <code>post-commit</code> script on your <code>.git/hooks</code> folder so you can <em>GPLOY</em> from your commit message as well.</p>
+
+<h3>
+<a name="gploy-rest" class="anchor" href="#gploy-rest"><span class="octicon octicon-link"></span></a>gploy …rest</h3>
+
+<p>Anything else after the <code>gploy</code> command will be used as an environment, like this:  </p>
+
+<pre><code>gploy dev stage production
+</code></pre>
+
+<p>In this case <em>GPLOY</em> will expect to find <strong>dev</strong>, <strong>stage</strong> and <strong>production</strong> configs on your <code>gploy.yaml</code> file.</p>
+
+<h2>
+<a name="basic-example" class="anchor" href="#basic-example"><span class="octicon octicon-link"></span></a>Basic example</h2>
+
+<p>If you only have one server, just name whatever you want and run <code>gploy</code>.   </p>
+
+<pre><code>awesome:
+    host: "ftp.myserver.com"
+    user: "user"
+    pass: "password"
+    path:
+        local: "deploy/"
+        remote: "public_html/"
+</code></pre>
+
+<p>Deploying on the command line:</p>
+
+<pre><code>gploy
+</code></pre>
+
+<p>You can also set the environment that you want to upload:  </p>
+
+<pre><code>gploy awesome
+</code></pre>
+
+<h2>
+<a name="attributes-of-the-gployyaml" class="anchor" href="#attributes-of-the-gployyaml"><span class="octicon octicon-link"></span></a>Attributes of the gploy.yaml</h2>
+
+<h3>
+<a name="scheme" class="anchor" href="#scheme"><span class="octicon octicon-link"></span></a>scheme</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>ftp</code><br>
+</li>
+</ul><p><em>GPLOY</em> has two available schemes: <strong>ftp</strong> and <strong>sftp</strong>. You must provide this information, because we don't like to play guessing games.</p>
+
+<h3>
+<a name="host" class="anchor" href="#host"><span class="octicon octicon-link"></span></a>host</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>none</code>
+</li>
+</ul><h3>
+<a name="port" class="anchor" href="#port"><span class="octicon octicon-link"></span></a>port</h3>
+
+<ul>
+<li>Type: <code>Number</code><br>
+</li>
+<li>Default: <code>21</code> when ftp and <code>22</code> when sftp</li>
+</ul><p>The port that your hosting server is using. Note that the default value is different depending on <strong>scheme</strong> that you are using.</p>
+
+<h3>
+<a name="user" class="anchor" href="#user"><span class="octicon octicon-link"></span></a>user</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>none</code>
+</li>
+</ul><h3>
+<a name="pass" class="anchor" href="#pass"><span class="octicon octicon-link"></span></a>pass</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>none</code>
+</li>
+</ul><h3>
+<a name="revision" class="anchor" href="#revision"><span class="octicon octicon-link"></span></a>revision</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>.rev</code><br>
+</li>
+</ul><p>To check the different between your local files and what's on the server, we have to create a temporary file with the reference of the last commit you've uploaded. This parameter defines the name of this file.</p>
+
+<h3>
+<a name="slots" class="anchor" href="#slots"><span class="octicon octicon-link"></span></a>slots</h3>
+
+<ul>
+<li>Type: <code>Number</code><br>
+</li>
+<li>Default: <code>1</code><br>
+</li>
+</ul><p>To make the upload faster, you can create multiple connections to your server.</p>
+
+<h3>
+<a name="check" class="anchor" href="#check"><span class="octicon octicon-link"></span></a>check</h3>
+
+<ul>
+<li>Type: <code>Boolean</code><br>
+</li>
+<li>Default: <code>false</code><br>
+</li>
+</ul><p>If you set this parameter to <code>true</code>, you will be prompted to confirm the list of files before the actual action.</p>
+
+<h3>
+<a name="branch" class="anchor" href="#branch"><span class="octicon octicon-link"></span></a>branch</h3>
+
+<ul>
+<li>Type: <code>String</code> or <code>Array</code><br>
+</li>
+<li>Default: <code>none</code><br>
+</li>
+</ul><p>You can set a list of branches that are allowed to deploy to your server. This will also help you to avoid accidental uploads to different servers.<br>
+Note that you can also set a string (a single branch), rather than a list.</p>
+
+<h3>
+<a name="pathlocal" class="anchor" href="#pathlocal"><span class="octicon octicon-link"></span></a>path.local</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>none</code><br>
+</li>
+</ul><p>The local folder that you want to upload to the server. If you don't set anything, the entire folder of your project will be uploaded.</p>
+
+<h3>
+<a name="pathremote" class="anchor" href="#pathremote"><span class="octicon octicon-link"></span></a>path.remote</h3>
+
+<ul>
+<li>Type: <code>String</code><br>
+</li>
+<li>Default: <code>none</code><br>
+</li>
+</ul><p>The remote folder where your files will be uploaded. If you don't set anything, your files will be uploaded to the root of your server. We <strong>highly recommend</strong> that you set this!</p>
+
+<h3>
+<a name="exclude" class="anchor" href="#exclude"><span class="octicon octicon-link"></span></a>exclude</h3>
+
+<ul>
+<li>Type: <code>Array</code><br>
+</li>
+<li>Default: <code>none</code><br>
+</li>
+</ul><p>Exclude files that are tracked by git, but that you don't want on your server. You can target individual files or use <a href="https://github.com/isaacs/minimatch">glob</a> to target multiple files and file types.</p>
+
+<ul>
+<li>Individual files: <code>exclude: ["gploy.yaml", "package.json", "path/to/file.js"]</code>.</li>
+<li>Using glob: <code>exclude: ["*.yaml", "*.json", "path/**/*.js", "**/*.md"]</code>.</li>
+</ul><h3>
+<a name="include" class="anchor" href="#include"><span class="octicon octicon-link"></span></a>include</h3>
+
+<ul>
+<li>Type: <code>Object</code><br>
+</li>
+<li>Default: <code>none</code><br>
+</li>
+</ul><p>The <strong>include</strong> parameter is similar to the <strong>exclude</strong>. But instead of an array, it expects an object.<br>
+The <strong>key</strong> of your object is what <em>GPLOY</em> is gonna search locally and the <strong>value</strong> of your object is the path of the remote server. Again you can also target individual files or multiple using <a href="https://github.com/isaacs/minimatch">glob</a> on the key of your object.</p>
+
+<pre><code>include:
+    "videos/kitty.mp4 videos/dog.mp4 videos/goat.mp4": "videos/"
+    "videos/*.mp4": "videos/"
+    "*.json *.yaml *.xml": "data/"
+</code></pre>
+
+<p><em>Note that you can set multiple patterns separated by a empty space on the key of your object</em></p>
+
+<h2>
+<a name="ignore-include-flag" class="anchor" href="#ignore-include-flag"><span class="octicon octicon-link"></span></a>Ignore include flag</h2>
+
+<p>If you are using the <strong>include</strong> parameter on your <code>gploy.yaml</code>, you will note that those files will always be uploaded to the server, no matter if they were modified or not (because they aren't necessarily tracked by git).<br>
+In order to avoid re-uploading those files all the time, there's a tag called <code>--ignore-include</code> that you can set when calling <em>GPLOY</em>.  </p>
+
+<pre><code>gploy stage --ignore-include
+</code></pre>
+
+<p>Or using a shortcut:  </p>
+
+<pre><code>gploy stage -i
+</code></pre>
+
+<h2>
+<a name="multiple-environments" class="anchor" href="#multiple-environments"><span class="octicon octicon-link"></span></a>Multiple environments</h2>
+
+<p>Most of the times we have to work on different environments (dev, stage, production…).<br>
+With <em>GPLOY</em> is really easy to make multiple deploys using a single command. All you need to do is create different configurations on your <code>gploy.yaml</code> file, like this:</p>
+
+<pre><code>dev:
+    host: "dev.myserver.com"
+    user: "dev_user"
+    pass: "dev_password"
+    path:
+        local: "deploy/"
+        remote: "public_html/"
+
+stage:
+    host: "stage.myserver.com"
+    user: "stage_user"
+    pass: "stage_password"
+    path:
+        local: "deploy/"
+        remote: "public_html/"
+
+production:
+    host: "myserver.com"
+    user: "production_user"
+    pass: "production_password"
+    path:
+        local: "deploy/"
+        remote: "public_html/"
+</code></pre>
+
+<p>Deploy to <strong>stage</strong> environment only:</p>
+
+<pre><code>gploy stage
+</code></pre>
+
+<p>Or if you want to upload to more than one environment:  </p>
+
+<pre><code>gploy dev stage production
+</code></pre>
+
+<h2>
+<a name="including-and-excluding-files" class="anchor" href="#including-and-excluding-files"><span class="octicon octicon-link"></span></a>Including and excluding files</h2>
+
+<p>This example will upload your local <code>deploy</code> folder to your remote <code>public_html</code> folder and:    </p>
+
+<ul>
+<li>Will <strong>include</strong> all <code>.mp4</code> files inside your <code>videos</code> folder to a remote folder named <code>funny</code> on your server.</li>
+<li>Will <strong>include</strong> all <code>json</code>, <code>yaml</code> and <code>xml</code> files at your cwd folder to a remote folder named <code>data</code>.</li>
+<li>Will <strong>exclude</strong> all <code>yaml</code>, <code>json</code> from your <code>deploy</code> folder.</li>
+<li>Will <strong>exclude</strong> all <code>js</code> files inside the folder <code>deploy/path</code>.</li>
+<li>Will <strong>exclude</strong> all <code>md</code> files from your <code>deploy</code> folder.</li>
+</ul><pre><code>awesome:
+    host: "ftp.myserver.com"
+    user: "user"
+    pass: "password"
+    path:
+        local: "deploy/"
+        remote: "public_html/"
+    exclude: ["deploy/*.yaml", "deploy/*.json", "deploy/path/**/*.js", "deploy/**/*.md"]
+    include:
+        "videos/*.mp4": "funny/"
+        "*.json *.yaml *.xml": "data/"
+
+</code></pre>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/LeanMeanFightingMachine">LeanMeanFightingMachine</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+    
+  </body>
+</html>
