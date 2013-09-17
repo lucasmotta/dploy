@@ -11,10 +11,10 @@ module.exports = class GPLOY
 
 	constructor: ->
 		# Call the gploy.yaml template generator
-		if process.argv[2] == "install"
+		if process.argv.indexOf("install") >= 0
 			new Generator()
 		# Open the help
-		else if process.argv[2] == "--help" or process.argv[2] == "-h"
+		else if process.argv.indexOf("--help") >= 0 or process.argv.indexOf("-h") >= 0
 			console.log "show help"
 		# Deploy
 		else
