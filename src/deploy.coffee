@@ -1,4 +1,5 @@
 colors		= require "colors"
+path 		= require "path"
 fs			= require "fs"
 YAML		= require "yamljs"
 Signal		= require "signals"
@@ -58,6 +59,7 @@ module.exports = class Deploy
 				return console.log "Error:".bold.red, "We couldn't find the settings for " + "#{@server}".bold.red
 				process.exit(code=0)
 
+
 			# Setup the default configuration
 			@setupDefaultConfig()
 
@@ -78,6 +80,11 @@ module.exports = class Deploy
 		@config.path.remote ?= ""
 		@config.exclude ?= []
 		@config.include ?= {}
+
+		# Fix the paths
+		regExpPath = new RegExp("(.*[^/]$)")
+		@config.path.local = @config.path.local.replace(regExpPath, "$1/") if @config.path.local isnt ""
+		@config.path.remote = @config.path.remote.replace(regExpPath, "$1/") if @config.path.remote isnt ""
 
 
 	# Check if the branch you are working on can be deployed to that server
