@@ -29,3 +29,4 @@ module.exports = class Generator
 		usage += "  gploy -h \t\t #{'# Show the instructions'.grey}"
 
 		console.log usage
+		process.exit(code=0)
