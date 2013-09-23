@@ -1,8 +1,8 @@
 {
 	"name"			: "gploy",
-	"version"		: "0.0.2",
+	"version"		: "0.1.0",
 	"author"		: "Lucas Motta <http://lucasmotta.com>",
-	"description"	: "Tool to deploy websites using FTP/SFTP and git.",
+	"description"	: "Command line tool to deploy websites using FTP/SFTP and git.",
 	"keywords"		: ["ftp", "sftp", "deploy", "git"],
 
 	"bin": {
@@ -14,10 +14,8 @@
 	},
 	
 	"dependencies": {
-		"coffee-script"		: "1.6.x",
 		"colors"			: "0.6.x",
 		"yamljs"			: "0.1.x",
-		"optimist"			: "0.4.x",
 		"signals"			: "1.0.x",
 		"ftp"				: "0.3.x",
 		"ssh2"				: "0.2.x",

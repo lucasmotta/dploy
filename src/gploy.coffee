@@ -2,6 +2,7 @@ colors	= require "colors"
 
 Deploy = require "./deploy"
 Generator = require "./generator"
+Help = require "./help"
 
 module.exports = class GPLOY
 
@@ -15,7 +16,7 @@ module.exports = class GPLOY
 			new Generator()
 		# Open the help
 		else if process.argv.indexOf("--help") >= 0 or process.argv.indexOf("-h") >= 0
-			console.log "show help"
+			new Help()
 		# Deploy
 		else
 			@servers = process.argv.splice(2, process.argv.length)

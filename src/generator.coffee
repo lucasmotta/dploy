@@ -53,4 +53,6 @@ module.exports = class Generator
 			fs.chmodSync fileName, "0755"
 			@_postCommitCompleted.dispatch()
 	
-	_completed: => console.log "Done!".bold.green + " Your project is ready to ".green + "GPLOY".green.bold + " :) ".green
+	_completed: =>
+		console.log "Done!".bold.green + " Your project is ready to ".green + "GPLOY".green.bold + " :) ".green
+		process.exit(code=0)
