@@ -281,7 +281,8 @@ module.exports = class Deploy
 			# And also ignore where the revision file is
 			return no if name.indexOf(@config.path.local) < 0
 
-		return !minimatch(name, exclude) for exclude in @config.exclude
+		for exclude in @config.exclude
+			return no if minimatch(name, exclude)
 
 		yes
 
