@@ -5,14 +5,21 @@
 	"description"	: "Command line tool to deploy websites using FTP/SFTP and git.",
 	"keywords"		: ["ftp", "sftp", "deploy", "git"],
 
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/LeanMeanFightingMachine/gploy"
+	},
+
+	"main": "./lib/gploy",
+
 	"bin": {
-		"gploy"		: "./bin/gploy"
+		"gploy": "./bin/gploy"
 	},
 
 	"engines": {
-		"node"		: "0.10.x"
+		"node": ">= 0.10.x"
 	},
-	
+
 	"dependencies": {
 		"colors"			: "0.6.x",
 		"yamljs"			: "0.1.x",
