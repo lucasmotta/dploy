@@ -19,5 +19,4 @@ lib
 gploy.yaml
 compile
 *.sublime-project
-*.sublime-workspaceGPLOY.sublime-project
-GPLOY.sublime-workspace
+*.sublime-workspace

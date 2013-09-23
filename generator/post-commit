@@ -1,0 +1,10 @@
+#!/bin/bash
+
+# GPLOY
+message=$(git log -1 --all --pretty=%B)
+tag="#gploy"
+if [[ "$message" = *"$tag"* ]]; then
+	servers=${tag}${message#*${tag}}
+	noTag=${servers//#/""}
+	eval $noTag
+fi
