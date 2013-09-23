@@ -16,7 +16,7 @@ node_modules
 # Project files #
 ######################
 lib
-gploy.yaml
+dploy.yaml
 compile
 *.sublime-project
 *.sublime-workspace

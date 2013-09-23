@@ -1,8 +1,8 @@
 #!/bin/bash
 
-# GPLOY
+# DPLOY
 message=$(git log -1 --all --pretty=%B)
-tag="#gploy"
+tag="#dploy"
 if [[ "$message" = *"$tag"* ]]; then
 	servers=${tag}${message#*${tag}}
 	noTag=${servers//#/""}

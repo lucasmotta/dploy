@@ -41,9 +41,9 @@ module.exports = class Deploy
 		@isConnected	= false
 
 		# Load the config file
-		fs.readFile "gploy.yaml", (error, data) =>
+		fs.readFile "dploy.yaml", (error, data) =>
 			if error
-				return console.log "Error:".bold.red, "The file \"gploy.yaml\" could not be found."
+				return console.log "Error:".bold.red, "The file \"dploy.yaml\" could not be found."
 				process.exit(code=0)
 
 			# Set the config file based on the arguments

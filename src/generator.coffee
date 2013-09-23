@@ -7,23 +7,23 @@ module.exports = class Generator
 
 
 	constructor: ->
-		@_gployCompleted = new Signal()
-		@_gployCompleted.add @_generatePostCommit
+		@_dployCompleted = new Signal()
+		@_dployCompleted.add @_generatePostCommit
 
 		@_postCommitCompleted = new Signal()
 		@_postCommitCompleted.add @_completed
 
-		console.log "Installing ".yellow + "GPLOY".bold.yellow + "...".yellow
+		console.log "Installing ".yellow + "DPLOY".bold.yellow + "...".yellow
 
-		@_generateGPLOY()
+		@_generateConfig()
 
-	_generateGPLOY: =>
-		fileName = "gploy.yaml"
+	_generateConfig: =>
+		fileName = "dploy.yaml"
 
 		# If the file does not exist, copy the generator example to user's folder
-		fs.createReadStream(path.resolve(__dirname, "../generator/gploy.yaml")).pipe(fs.createWriteStream(fileName)) unless fs.existsSync fileName
+		fs.createReadStream(path.resolve(__dirname, "../generator/dploy.yaml")).pipe(fs.createWriteStream(fileName)) unless fs.existsSync fileName
 
-		@_gployCompleted.dispatch()
+		@_dployCompleted.dispatch()
 
 
 	# Generate the content of the post-commit hook
@@ -38,7 +38,7 @@ module.exports = class Generator
 		if fs.existsSync fileName
 			# If it does, read the content to see if the command already exists in the file
 			fileData = fs.readFileSync(fileName).toString()
-			if fileData.toLowerCase().indexOf("gploy") >= 0
+			if fileData.toLowerCase().indexOf("dploy") >= 0
 				return @_postCommitCompleted.dispatch()
 			
 			# Remove the bash import if it's already there
@@ -54,5 +54,5 @@ module.exports = class Generator
 			@_postCommitCompleted.dispatch()
 	
 	_completed: =>
-		console.log "Done!".bold.green + " Your project is ready to ".green + "GPLOY".green.bold + " :) ".green
+		console.log "Done!".bold.green + " Your project is ready to ".green + "DEPLOY".green.bold + " :) ".green
 		process.exit(code=0)

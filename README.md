@@ -1,33 +1,33 @@
-**GPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.  
+**DPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.  
 It uses **git** to upload only the files that were modified since the last deploy – **HOT STUFF**.
 
 ## Install
 ```
-npm install gploy -g
+npm install dploy -g
 ```
 
 ## Help
 ```
-gploy --help
+dploy --help
 ```
 
 ## Commands
-### gploy
-Will deploy the first environment that you have on your `gploy.yaml`
+### dploy
+Will deploy the first environment that you have on your `dploy.yaml`
 
-### gploy install
-Will install the `gploy.yaml` file and set up a `post-commit` script on your `.git/hooks` folder so you can _GPLOY_ from your commit message as well.
+### dploy install
+Will install the `dploy.yaml` file and set up a `post-commit` script on your `.git/hooks` folder so you can _DPLOY_ from your commit message as well.
 
-### gploy …rest
-Anything else after the `gploy` command will be used as an environment, like this:  
+### dploy …rest
+Anything else after the `dploy` command will be used as an environment, like this:  
   
 ```
-gploy dev stage production
+dploy dev stage production
 ```  
-In this case _GPLOY_ will expect to find **dev**, **stage** and **production** configs on your `gploy.yaml` file.
+In this case _DPLOY_ will expect to find **dev**, **stage** and **production** configs on your `dploy.yaml` file.
 
 ## Basic example
-If you only have one server, just name whatever you want and run `gploy`.   
+If you only have one server, just name whatever you want and run `dploy`.   
 
 ```
 awesome:
@@ -42,21 +42,21 @@ awesome:
 Deploying on the command line:
 
 ```
-gploy
+dploy
 ```
 
 You can also set the environment that you want to upload:  
   
 ```
-gploy awesome
+dploy awesome
 ```
 
-## Attributes of the gploy.yaml
+## Attributes of the dploy.yaml
 ### scheme
 * Type: `String`  
 * Default: `ftp`  
 
-_GPLOY_ has two available schemes: **ftp** and **sftp**. You must provide this information, because we don't like to play guessing games.
+_DPLOY_ has two available schemes: **ftp** and **sftp**. You must provide this information, because we don't like to play guessing games.
 
 ### host
 * Type: `String`  
@@ -119,7 +119,7 @@ The remote folder where your files will be uploaded. If you don't set anything, 
 
 Exclude files that are tracked by git, but that you don't want on your server. You can target individual files or use [glob](https://github.com/isaacs/minimatch) to target multiple files and file types.
   
-* Individual files: `exclude: ["gploy.yaml", "package.json", "path/to/file.js"]`.
+* Individual files: `exclude: ["dploy.yaml", "package.json", "path/to/file.js"]`.
 * Using glob: `exclude: ["*.yaml", "*.json", "path/**/*.js", "**/*.md"]`.
 
 ### include
@@ -127,7 +127,7 @@ Exclude files that are tracked by git, but that you don't want on your server. Y
 * Default: `none`    
 
 The **include** parameter is similar to the **exclude**. But instead of an array, it expects an object.  
-The **key** of your object is what *GPLOY* is gonna search locally and the **value** of your object is the path of the remote server. Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
+The **key** of your object is what *DPLOY* is gonna search locally and the **value** of your object is the path of the remote server. Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
 
 ```
 include:
@@ -138,22 +138,22 @@ include:
 _Note that you can set multiple patterns separated by a empty space on the key of your object_
 
 ## Ignore include flag
-If you are using the **include** parameter on your `gploy.yaml`, you will note that those files will always be uploaded to the server, no matter if they were modified or not (because they aren't necessarily tracked by git).  
-In order to avoid re-uploading those files all the time, there's a tag called `--ignore-include` that you can set when calling _GPLOY_.  
+If you are using the **include** parameter on your `dploy.yaml`, you will note that those files will always be uploaded to the server, no matter if they were modified or not (because they aren't necessarily tracked by git).  
+In order to avoid re-uploading those files all the time, there's a tag called `--ignore-include` that you can set when calling _DPLOY_.  
   
 ```
-gploy stage --ignore-include
+dploy stage --ignore-include
 ```  
 Or using a shortcut:  
   
 ```
-gploy stage -i
+dploy stage -i
 ```
 
 
 ## Multiple environments
 Most of the times we have to work on different environments (dev, stage, production…).  
-With _GPLOY_ is really easy to make multiple deploys using a single command. All you need to do is create different configurations on your `gploy.yaml` file, like this:
+With _DPLOY_ is really easy to make multiple deploys using a single command. All you need to do is create different configurations on your `dploy.yaml` file, like this:
 
 ```
 dev:
@@ -184,12 +184,12 @@ production:
 Deploy to **stage** environment only:
 
 ```
-gploy stage
+dploy stage
 ```
 Or if you want to upload to more than one environment:  
   
 ```
-gploy dev stage production
+dploy dev stage production
 ```
 
 ## Including and excluding files

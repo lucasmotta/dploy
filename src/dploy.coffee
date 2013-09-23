@@ -4,14 +4,14 @@ Deploy = require "./deploy"
 Generator = require "./generator"
 Help = require "./help"
 
-module.exports = class GPLOY
+module.exports = class DPLOY
 
 	servers			: null
 	connection		: null
 	ignoreInclude	: false
 
 	constructor: ->
-		# Call the gploy.yaml template generator
+		# Call the DPLOY generator
 		if process.argv.indexOf("install") >= 0
 			new Generator()
 		# Open the help

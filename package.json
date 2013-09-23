@@ -1,5 +1,5 @@
 {
-	"name"			: "gploy",
+	"name"			: "dploy",
 	"version"		: "0.1.0",
 	"author"		: "Lucas Motta <http://lucasmotta.com>",
 	"description"	: "Command line tool to deploy websites using FTP/SFTP and git.",
@@ -7,13 +7,13 @@
 
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/LeanMeanFightingMachine/gploy"
+		"url": "https://github.com/LeanMeanFightingMachine/dploy"
 	},
 
-	"main": "./lib/gploy",
+	"main": "./lib/dploy",
 
 	"bin": {
-		"gploy": "./bin/gploy"
+		"dploy": "./bin/dploy"
 	},
 
 	"engines": {
