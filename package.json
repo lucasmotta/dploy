@@ -1,6 +1,6 @@
 {
 	"name"			: "dploy",
-	"version"		: "0.1.2",
+	"version"		: "0.1.3",
 	"author"		: "Lucas Motta <http://lucasmotta.com>",
 	"description"	: "Command line tool to deploy websites using FTP/SFTP and git.",
 	"keywords"		: ["ftp", "sftp", "deploy", "git"],
