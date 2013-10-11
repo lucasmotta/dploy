@@ -1,0 +1,95 @@
+/**
+ * REM Properties
+ * Convert all following properties to use REM if you don't set an unit:
+ * font-size, line-height, border-radius, width, height,
+ * min-width, max-width, min-height, max-height, background-size
+ * margin, margin-top, margin-bottom, margin-left, margin-right,
+ * padding, padding-top, padding-bottom, padding-left, padding-right
+ */
+rembo(property, values)
+	if(length(values) > 0)
+		r = ''
+		px = ''
+
+		for value, index in values
+			if(index)
+				r = r + " "
+				px = px + " "
+
+			if typeof(value) is "unit" and value > 0
+				if unit(value) is ""
+					px = px + unit(value, "px")
+					r = r + unit((value / 10), "rem")
+				else
+					px = px + value
+					r = r + value
+			else 
+				px = px + value
+				r = r + value
+
+		{property}: unquote(px)
+		
+		if(px isnt r)
+			{property}: unquote(r)
+	else
+		{property}
+
+font-size()
+	rembo(font-size, arguments)
+
+line-height()
+	rembo(line-height, arguments)
+
+border-radius()
+	rembo(border-radius, arguments)
+
+margin()
+	rembo(margin, arguments)
+
+margin-top()
+	rembo(margin-top, arguments)
+
+margin-bottom()
+	rembo(margin-bottom, arguments)
+
+margin-left()
+	rembo(margin-left, arguments)
+
+margin-right()
+	rembo(margin-right, arguments)
+
+padding()
+	rembo(padding, arguments)
+
+padding-top()
+	rembo(padding-top, arguments)
+
+padding-bottom()
+	rembo(padding-bottom, arguments)
+
+padding-left()
+	rembo(padding-left, arguments)
+
+padding-right()
+	rembo(padding-right, arguments)
+
+width()
+	rembo(width, arguments)
+
+height()
+	rembo(height, arguments)
+
+min-height()
+	rembo(min-height, arguments)
+
+max-height()
+	rembo(max-height, arguments)
+
+min-width()
+	rembo(min-width, arguments)
+
+max-width()
+	rembo(max-width, arguments)
+
+background-size()
+	rembo(background-size, arguments)

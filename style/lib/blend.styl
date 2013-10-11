@@ -1,0 +1,267 @@
+/* blend one colour with another -- gives you compositing modes! Especially
+ * useful for creating opaque colours. Arguments:
+ *
+ * 		colour1: the background colour
+ *
+ * 		colour2: the foreground colour
+ *
+ * 		amount: the alpha or alpha modifier of colour2; can be a float or
+ * 		percentage. If blank or false, it'll try to get the alpha value from
+ * 		colour2, and lastly, default to 50% for normal and 100% for all other
+ * 		blending modes. If colour2 has alpha, it is reduced by this value
+ *
+ * 		blendmode: the blending or compositing mode, as explained by the W3C
+ * 		draft specs for compositing and blending in SVG [1] and CSS [2]. Note:
+ * 		some of the formulae presented in the spec seem to produce completely
+ * 		wrong results; I could use some help from people who know something
+ * 		about Messrs Porter and Duff.
+ *
+ * 		I've used different variable names from the reference formulae presented
+ * 		in the specs; here's a translation guide:
+ *
+ * 			Da  = alpha1 (foreground alpha)
+ * 			Sa  = alpha2 (background alpha)
+ * 			Dca = colour1a (foreground colour, premultiplied by its alpha)
+ * 			Sca = colour2a (background colour, premultiplied by its alpha)
+ * 			m   = colour2n (background colour, de-premultiplied, used only in
+ * 				  the soft-light blending mode)
+ *
+ * 		And I also used a shorthand function called comp(), because it was a
+ * 		formula that popped up often in the different blending mode formulae.
+ * 		It multiplies a colour by 1 - its complement's alpha. Hence:
+ *
+ * 			comp(colour1a, alpha2) = colour1a * (1 - alpha2)
+ * 			comp(colour2a, alpha1) = colour2a * (1 - alpha1)
+ *
+ * 		[1] http://dev.w3.org/SVG/modules/compositing/master/
+ * 		[2] https://dvcs.w3.org/hg/FXTF/rawfile/tip/compositing/index.html
+ *
+ * 		And now for the blending modes!
+ *
+ * 			normal (default): the usual, like translucent tracing paper
+ *
+ * 			multiply: darken colour1 by colour2, like stained glass
+ *
+ * 			screen: lighten colour1 by colour2, like shining two lights on a surface
+ *
+ * 			plus: similar to screen, only stronger -- called 'addition' in most
+ * 			graphics applications
+ *
+ * 			overlay: multiplies for darker colours, screens for lighter colours,
+ * 			but not as strong as either
+ *
+ * 			darken: darken the background by the foreground; similar to multiply,
+ * 			but gentler, because it only darkens the background if the background
+ * 			is lighter than the foreground
+ *
+ * 			lighten: lighten the background by the foreground; similar to screen,
+ * 			but gentler, because it only lightens the background if the background
+ * 			is darker than the foreground
+ *
+ * 			color-dodge: brighten the background by the foreground. Quite a
+ * 			strong effect compared to screen, and creates lurid colours. NOTE:
+ * 			the reference formulae I found do not work at all; I could use some
+ * 			help with this one.
+ *
+ * 			color-burn: the background is darkened by the foreground. Again, a
+ * 			stronger effect than multiply. And again, the reference formulae I
+ * 			found do not work.
+ *
+ * 			hard-light: a very strong darken/lighten effect; stronger than
+ * 			overlay. It almost works perfectly; some colours are a bit more
+ * 			intense than reference examples of hard-light.
+ *
+ * 			soft-light: a very mild darken/lighten effect, similar to overlay.
+ * 			The reference formulae don't work in the least; they give a nice
+ * 			effect (halfway between normal and overlay), but it doesn't resemble
+ * 			soft-light at all.
+ *
+ * 			difference: subtract the foreground from the background. Light
+ * 			foregrounds have the effect of reversing background colours.
+ *
+ * 			exclusion: similar to difference, but milder.
+ */
+blend(colour1, colour2, amount = null, blendmode = normal) {
+
+	// function for clipping a calculated to within the 0 - 1 range
+	clipcolour(colour) {
+		if colour < 0 {
+			0;
+		}
+		if colour > 1 {
+			1;
+		}
+		colour;
+	}
+
+	// blending mode calculations
+	// commonly used calculation - for calculating a premultiplied colour with
+	// its complementary alpha
+	comp(colour, alpha) {
+		colour * (1 - alpha);
+	}
+	// works great!
+	multiply(colour1a, colour2a, alpha1, alpha2) {
+		colour2a * colour1a + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+	}
+	// works great!
+	screen(colour1a, colour2a, alpha1, alpha2) {
+		colour2a + colour1a - colour2a * colour1a;
+	}
+	// works great!
+	plus(colour1a, colour2a, alpha1, alpha2) {
+		colour2a + colour1a;
+	}
+	// works great!
+	overlay(colour1a, colour2a, alpha1, alpha2) {
+		if colour1a * 2 <= alpha1 {
+			colour2a * colour1a * 2 + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+		} else {
+			comp(colour2a, alpha1) + comp(colour1a, alpha2) - 2 * (alpha1 - colour1a) * (alpha2 - colour2a) +  alpha2 * alpha1;
+		}
+	}
+	// works great!
+	darken(colour1a, colour2a, alpha1, alpha2) {
+		min(colour2a * alpha1, colour1a * alpha2) + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+	}
+	// works great!
+	lighten(colour1a, colour2a, alpha1, alpha2) {
+		max(colour2a * alpha1, colour1a * alpha2) + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+	}
+	// completely broken; doesn't produce anything remotely resembling expected result
+	color-dodge(colour1a, colour2a, alpha1, alpha2) {
+		if colour2a == alpha2 {
+			if colour1a == 0 {
+				comp(colour2a, alpha1);
+			} else {
+				alpha2 * alpha1 + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+			}
+		} else {
+			min(alpha2 * alpha1, colour1a * (alpha2 / (alpha2 * alpha1 - colour2a * alpha1)));
+		}
+	}
+	// broken as well; produces a flat colour slightly darker than the background
+	color-burn(colour1a, colour2a, alpha1, alpha2) {
+		if colour2a == 0 {
+			if colour1a == alpha1 {
+				alpha2 * alpha1 + comp(colour1a, alpha2);
+			} else {
+				comp(colour1a, alpha2);
+			}
+		} else {
+			alpha2 * alpha1 - min(alpha2 * alpha1, ((alpha2 * alpha1 - colour1a * alpha2) / colour2a * alpha1)) + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+		}
+	}
+	// pretty close; needs a tiny bit of tuning
+	hard-light(colour1a, colour2a, alpha1, alpha2) {
+		if colour2a * 2 <= alpha2 {
+			2 * colour2a * colour1a + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+		} else if 2 * colour2a > alpha2 {
+			alpha2 * alpha1 - 2 * (alpha1 - colour1a) * (alpha2 - colour2a) + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+		}
+	}
+	// does not work; doesn't even resemble the soft-light mode
+	soft-light(colour1a, colour2a, alpha1, alpha2) {
+		// we need a non-premultiplied colour2 for this mode
+		colour2n = (colour2a / alpha2);
+		if 2 * colour1a <= alpha1 {
+			colour2a * (alpha1 + (2 * colour1a - alpha1) * (1 - colour2n)) + comp(colour1a, alpha2) + comp(colour2a, alpha1);
+		} else if 2 * colour1a > alpha1 && 4 * colour2a <= alpha2 {
+			alpha2 * (2 * colour1a - alpha1) * (16 * colour2n ** 3 - 12 * colour2n ** 2 - 3 * colour2n) + colour1a - colour1a * alpha2 + colour2a;
+		} else if 2 * colour1a > alpha1 && 4 * colour2a > alpha2 {
+			alpha2 * (2 * colour1a - alpha1) * (colour2n ** 0.5 - colour2n) + colour1a - colour1a * alpha2 + colour2a;
+		}
+	}
+	// works great!
+	difference(colour1a, colour2a, alpha1, alpha2) {
+		colour2a + colour1a - 2 * min(colour2a * alpha1, colour1a * alpha2);
+	}
+	// works great!
+	exclusion(colour1a, colour2a, alpha1, alpha2) {
+		(colour2a * alpha1 + colour1a * alpha2 - 2 * colour2a * colour1a) + comp(colour2a, alpha1) + comp(colour1a, alpha2);
+	}
+	// works great, of course
+	normal(colour1a, colour2a, alpha1, alpha2) {
+		colour2a + comp(colour1a, alpha2);
+	}
+
+	// get 8-bit colour values and convert to floats
+	red1 = (red(colour1) / 255);
+	green1 = (green(colour1) / 255);
+	blue1 = (blue(colour1) / 255);
+	alpha1 = alpha(colour1);
+	red2 = (red(colour2) / 255);
+	green2 = (green(colour2) / 255);
+	blue2 = (blue(colour2) / 255);
+	alpha2 = alpha(colour2);
+
+	// if a percentage was given as an amount, convert to float
+	if amount {
+		if unit(amount) == '%' {
+			amount = unit(amount / 100, '');
+		}
+	}
+
+	// if amount is empty, change it to a sensible value. That means 1 for fancy
+	// compositing modes, 0.5 for normal blending mode with an RGB value, and 1
+	// for normal mode with an RGBA value (because if an RGBA value is passed
+	// as the second colour, we can just use the alpha channel of that colour
+	// instead).
+	if blendmode != normal {
+		if !amount {
+			amount = 1;
+		}
+	} else {
+		if !amount || amount == 1 {
+			if alpha2 > 0 && alpha2 < 1 {
+				amount = 1;
+			} else {
+				amount = .5;
+			}
+		}
+	}
+
+	// amount adjusts alpha2 and then is no longer used. If you're familiar with
+	// SVG spec, think of amount as opacity.
+	alpha2 = amount * alpha2;
+
+	// calculate final alpha, which is the same for any blending mode
+	alpha3 = alpha1 + alpha2 - alpha1 * alpha2;
+
+	// premultiply RGB values for each colour, cf. Porter/Duff
+	red1a = red1 * alpha1;
+	green1a = green1 * alpha1;
+	blue1a = blue1 * alpha1;
+	red2a = red2 * alpha2;
+	green2a = green2 * alpha2;
+	blue2a = blue2 * alpha2;
+
+	// each blending mode takes the premultiplied RGB values, performs the
+	// blending operation, resulting in a premultiplied final value.
+	blendfunc = normal;
+	blendfunc = multiply if blendmode == multiply;
+	blendfunc = screen if blendmode == screen;
+	blendfunc = plus if blendmode == plus;
+	blendfunc = overlay if blendmode == overlay;
+	blendfunc = darken if blendmode == darken;
+	blendfunc = lighten if blendmode == lighten;
+	blendfunc = color-dodge if blendmode == color-dodge;
+	blendfunc = color-burn if blendmode == color-burn;
+	blendfunc = hard-light if blendmode == hard-light;
+	blendfunc = soft-light if blendmode == soft-light;
+	blendfunc = difference if blendmode == difference;
+	blendfunc = exclusion if blendmode == exclusion;
+
+	// calculate the new colours
+	red3a = blendfunc(red1a, red2a, alpha1, alpha2);
+	green3a = blendfunc(green1a, green2a, alpha1, alpha2);
+	blue3a = blendfunc(blue1a, blue2a, alpha1, alpha2);
+
+	// take premultiplied RGB values for final colour and derive actual colours
+	// by un-multiplying them by the final alpha. Then clip each.
+	red3 = clipcolour(red3a / alpha3);
+	green3 = clipcolour(green3a / alpha3);
+	blue3 = clipcolour(blue3a / alpha3);
+
+	rgba(round(red3 * 255), round(green3 * 255), round(blue3 * 255), alpha3);
+}

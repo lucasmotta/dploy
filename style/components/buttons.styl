@@ -1,0 +1,57 @@
+/////////////////////////////////////////////////////////////////////////
+// STYLE
+/////////////////////////////////////////////////////////////////////////
+
+.btn
+	display: inline-block
+	text-transform: uppercase
+	color: COLOR_PRIMARY_BACKGROUND
+	font-weight: bold
+	transition: background .5s ease-out-expo, color .5s ease-out-expo
+
+.btn--primary
+	background: COLOR_PRIMARY_BACKGROUND
+	color: COLOR_PRIMARY_FONT
+	height: 60px
+	line-height: 60px
+	padding: 0px 50px
+	font-size: 18
+	border-radius: 6px
+
+	&:hover
+		color: white
+		background: COLOR_SECONDARY_BACKGROUND
+
+.btn--github
+	absolute: bottom -30px left 50%
+	transform: translate(-50%, 0)
+
+.btn--space
+	overflow: hidden
+
+	span
+		position: relative
+		z-index: 10
+
+	.fx
+		absolute: top left
+		z-index: 5
+		size: 100%
+		bg: "space-normal.png" COLOR_PRIMARY_BACKGROUND repeat
+		animation: space 4s linear infinite
+		transition: opacity 5s ease-out-expo
+		opacity: 0
+		border-radius: 6px
+
+		&:after
+			content: ""
+			absolute: top left
+			size: 100%
+			bg: "space-far.png" repeat
+			animation: space 10s linear infinite
+
+	&:hover
+		background: COLOR_PRIMARY_BACKGROUND
+
+		.fx
+			opacity: 1

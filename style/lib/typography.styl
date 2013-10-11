@@ -1,0 +1,52 @@
+/*
+ * Global font-face mixin
+ * Make sure that the font name matches the name of the font files
+ * e.g. font-face(DIN, '../fonts/')
+ */
+font-face(name, folder, weight = normal, style = normal)
+	@font-face
+		font-family: name
+		src: url(folder name unquote('.eot') '?#iefix') format('embedded-opentype'), url(folder name unquote('.woff')) format('woff'), url(folder name unquote('.ttf')) format('truetype'), url(folder name unquote('.svg') '#' name) format('svg');
+		font-weight: weight
+		font-style: style
+
+/**
+ * Simple mixin to change the font-size and line-height that follows a vertical rhythm based on steps
+ */
+font-step(scale, ratio = 1.333)
+	if scale is 0
+		font-size: FONT_SIZE
+		line-height: LINE_HEIGHT
+	else
+		font-size: newFontSize = round(FONT_SIZE * (ratio ** scale))
+		line-height: ceil(newFontSize / LINE_HEIGHT) * LINE_HEIGHT
+
+/**
+ * Add a top and bottom margin to your element based on steps
+ */
+vertical-space(before = 0, after = 0)
+	if before is 0
+		margin-top: before
+	else
+		margin-top: LINE_HEIGHT * before
+
+	if after is 0
+		margin-bottom: after
+	else
+		margin-bottom: LINE_HEIGHT * after
+
+
+/*
+ * Global Text selection mixin
+ * e.g. text-selection(#F80, #EEE)
+ */
+text-selection(backgroundColor, textColor = null)
+	textColor = white unless textColor
+
+	::-moz-selection
+		background: backgroundColor
+		color: textColor
+		
+	::selection
+		background: backgroundColor
+		color: textColor

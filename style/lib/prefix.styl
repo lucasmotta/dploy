@@ -1,0 +1,109 @@
+/**
+ * PREFIX
+ */
+
+/*
+ * Box-shadow mixin
+ * e.g. box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, .5)
+ */
+box-shadow()
+	-prefix(box-shadow, arguments)
+
+/*
+ * Border-radius mixin
+ * e.g. border-radius: 5px
+ */
+border-radius()
+	-prefix(border-radius, arguments)
+
+/*
+ * Box-sizing mixin
+ */
+box-sizing()
+	-prefix(box-sizing, arguments)
+
+/*
+ * Animation mixins
+ */
+animation()
+	-prefix(animation, arguments)
+
+animation-name()
+	-prefix(animation-name, arguments)
+
+animation-delay()
+	-prefix(animation-delay, arguments)
+
+animation-duration()
+	-prefix(animation-duration, arguments)
+
+animation-timing-function()
+	-prefix(animation-timing-function, arguments)
+
+animation-iteration-count()
+	-prefix(animation-iteration-count, arguments)
+
+animation-direction()
+	-prefix(animation-direction, arguments)
+
+animation-play-state()
+	-prefix(animation-play-state, arguments)
+
+animation-fill-mode()
+	-prefix(animation-fill-mode, arguments)
+
+/*
+ * Transition mixins
+ * e.g. transition: all 300ms ease-in-quad
+ */
+transition()
+	-prefix(transition, arguments)
+
+transition-property()
+	-prefix(transition-property, arguments)
+
+transition-duration()
+	-prefix(transition-duration, arguments)
+
+transition-timing-function()
+	-prefix(transition-timing-function, arguments)
+
+transition-delay()
+	-prefix(transition-delay, arguments)
+
+/*
+ * Transform mixins
+ * transform: rotate(20deg)
+ */
+transform()
+	-prefix(transform, arguments)
+
+transform-origin()
+	-prefix(transform-origin, arguments)
+
+perspective()
+	-prefix(perspective, arguments)
+
+perspective-origin()
+	-prefix(perspective-origin, arguments)
+
+transform-style()
+	-prefix(transform-style, arguments)
+
+backface-visibility()
+	-prefix(backface-visibility, arguments)
+
+/*
+ * Filter mixin
+ * currently supported by -webkit (in order to boot FF you'll need SVG)
+ * http://pixelhunter.me/post/25782670606/css3-grayscale
+ */
+filters()
+	-prefix(filter, arguments)
+
+/**
+ * Opacity mixin
+ */
+opacity(opacity)
+	filter: s("alpha(opacity = %s)", opacity * 100) if SUPPORT_IE
+	opacity: opacity

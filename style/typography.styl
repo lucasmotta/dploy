@@ -1,0 +1,78 @@
+/*
+	@bootstrap Typography
+
+	@usage
+		##### Sizes
+		You can change the size of your text by extending the following sizes: **.h1, .h2, .h3, .h4, .h5, .h6**.
+		
+		```html
+		<h1>Heading</h1>
+		<h2>Heading</h2>
+		<h3>Heading</h3>
+		<h4>Heading</h4>
+		<h5>Heading</h5>
+		<h6>Heading</h6>
+		<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Numquam, saepe!</p>
+		```
+*/
+
+
+/////////////////////////////////////////////////////////////////////////
+// STYLE
+/////////////////////////////////////////////////////////////////////////
+
+/*
+ * Apply the main typography in the body
+ */
+body
+	font-family: FONT_PRIMARY
+	font-step: 0
+	font-weight: 300
+	color: COLOR_BODY_FONT
+
+/*
+ * Default link style
+ */
+a
+	color: COLOR_BODY_FONT
+	font-weight: bold
+	text-decoration	: none
+
+	&:hover, &:active
+		color: COLOR_PRIMARY_BACKGROUND
+		text-decoration	: none
+
+/*
+ * Paragraphs and headers
+ */
+p
+	font-step: 0
+	vertical-space: 0, 1
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6
+	font-weight: bold
+
+h1, .h1
+	font-step: 3
+	vertical-space: 0, 0
+
+h2, .h2
+	font-step: 0
+	vertical-space: 0, 0
+
+h3, .h3
+	font-step: 0
+	vertical-space: 0, 0
+
+h4, .h4
+	font-step: 0
+	vertical-space: 0, 0
+
+h5, .h5
+	font-step: 0
+	vertical-space: 0, 0
+
+h6, .h6
+	font-step: -1
+	vertical-space: 0, 0

@@ -1,0 +1,163 @@
+body, html
+	size: 100% auto
+	min-height: 100%
+	background: COLOR_BODY_BACKGROUND
+
+.header
+	text-align: center
+	position: relative
+	height: 515px
+	bg: "clouds.png" #FDFCFB repeat-x center 40px
+
+	&:after
+		content: ""
+		absolute: bottom left
+		size: 100% 140px
+		background: #faf5e9
+
+.header__content
+	position: relative
+	height: 100%
+	z-index: 10
+	max-width: 540px
+	margin: 0 auto
+
+	p
+		margin-top: 10px
+
+.logo
+	display: inline-block
+	position: relative
+	overflow: hidden
+	margin: 65px 0 20px 10px
+	size: 193px
+	border-radius: 50%
+	font-size: 50px
+
+.logo__rocket
+	image-block: "rocket.png" 149px 165px
+	absolute: top 6px right 22px
+	z-index: 10
+	animation: .2s rocket linear infinite alternate, 1s rocket2 linear infinite alternate
+
+	@media RETINA_MEDIA
+		bg-retina: "rocket@2x.png"
+
+.logo__space
+	absolute: top left
+	z-index: 5
+	size: 100%
+	bg: "space-normal.png" COLOR_SECONDARY_BACKGROUND repeat
+	animation: space 4s linear infinite
+	transition: opacity 5s ease-out-expo
+	border-radius: 50%
+
+	-webkit-transform: translate3d(0,0,0)
+	-webkit-backface-visibility: hidden
+	-webkit-perspective: 1000
+
+	&:after
+		content: ""
+		absolute: top left
+		size: 100%
+		bg: "space-far.png" repeat
+		animation: space 10s linear infinite
+
+.logo__smoke
+	absolute: bottom left
+	size: 70px
+	padding: 0
+	margin: 0
+	z-index: 7
+	list-style: none
+
+	li
+		absolute: top right
+		background: rgba(255, 0, 0, .5)
+		border-radius: 50%
+		background: #FAF5E8
+		background: -moz-linear-gradient(top, #fdfcfb 0%, #faf5e9 30%, #faf5e9 100%)
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#fdfcfb), color-stop(30%,#faf5e9), color-stop(100%,#faf5e9))
+		background: -webkit-linear-gradient(top, #fdfcfb 0%,#faf5e9 30%,#faf5e9 100%)
+		background: -o-linear-gradient(top, #fdfcfb 0%,#faf5e9 30%,#faf5e9 100%)
+		background: -ms-linear-gradient(top, #fdfcfb 0%,#faf5e9 30%,#faf5e9 100%)
+		background: linear-gradient(to bottom, #fdfcfb 0%,#faf5e9 30%,#faf5e9 100%)
+		-webkit-transform: translate3d(0,0,0)
+		-webkit-backface-visibility: hidden
+		-webkit-perspective: 1000
+
+		&:nth-child(8)
+			size: 28px
+			top: 4px
+			right: 10px
+			animation: .1s * .8 smoke-shake3 linear infinite alternate
+			animation-delay: .1s
+
+		&:nth-child(7)
+			size: 36px
+			top: 10px
+			right: 0px
+			animation: .15s * .8 smoke-shake4 linear infinite alternate
+			animation-delay: .03s
+
+		&:nth-child(6)
+			size: 30px
+			top: 18px
+			right: -8px
+			animation: .12s * .8 smoke-shake5 linear infinite alternate
+			animation-delay: .08s
+
+		&:nth-child(5)
+			size: 60px
+			top: 0px
+			right: 40px
+			animation: .2s * .8 smoke-shake1 linear infinite alternate
+			animation-delay: .05s
+
+		&:nth-child(4)
+			size: 64px
+			top: 50px
+			right: -25px
+			animation: .12s * .8 smoke-shake5 linear infinite alternate
+			
+
+		&:nth-child(3)
+			size: 46px
+			top: 20px
+			right: 5px
+			animation: .1s * .8 smoke-shake3 linear infinite alternate
+			animation-delay: .09s
+
+		&:nth-child(2)
+			size: 30px
+			top: 38px
+			right: -15px
+			animation: .11s * .8 smoke-shake4 linear infinite alternate
+			animation-delay: .1s
+
+		&:nth-child(1)
+			size: 22px
+			top: 4px
+			right: 28px
+			animation: .15s * .8 smoke-shake2 linear infinite alternate
+			animation-delay: .01s
+
+
+.logo__astronaut
+	absolute: top left 40px
+	overflow: hidden
+	z-index: 6
+	size: 69px 63px
+	bg: "astronaut.png" no-repeat
+	animation: astronaut 25s linear infinite
+	-webkit-transform: translate3d(0,0,0)
+	-webkit-backface-visibility: hidden
+	-webkit-perspective: 1000
+
+
+.wrapper
+	max-width: 660px
+	margin: 0 auto
+	padding: 80px 10px 10px 10px
+
+

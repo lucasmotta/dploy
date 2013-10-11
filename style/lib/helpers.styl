@@ -1,0 +1,205 @@
+/**
+ * Basic clearfix mixin
+ */
+clearfix()
+	block()
+
+	&:after
+		content: "."
+		block()
+		height: 0
+		clear: both
+		visibility: hidden
+
+/*
+ * Position helper
+ */
+-pos(type, args)
+	i = 0
+	position: unquote(type)
+	if args
+		{args[i]}: args[i + 1] is a 'unit' ? args[i += 1] : 0
+		{args[i += 1]}: args[i + 1] is a 'unit' ? args[i += 1] : 0
+
+/*
+ * Position mixins
+ * e.g. absolute: top 5px left 40px
+ */
+absolute()
+	-pos('absolute', arguments)
+
+relative()
+	-pos('relative', arguments)
+
+fixed()
+	-pos('fixed', arguments)
+
+static()
+	-pos('static', arguments)
+
+/*
+ * Size mixin
+ */
+size(numbers...)
+	if length(numbers) > 1
+		width: numbers[0]
+		height: numbers[1]
+	else
+		width: numbers
+		height: numbers
+
+/*
+ * Prefix helper
+ * e.g. -prefix(border-radius, 3px) => all vendor list (check 'settings') based properties
+ */
+-prefix(prop, val)
+	for prefix in VENDORS
+		if prefix == official
+			{prop}: val
+		else
+			-{prefix}-{prop}: val
+
+/*
+ * Joins a few literals together into one string
+ */
+literal-join(string, literals)
+	result = unquote('')
+	first = true
+	for args in literals
+		subresult = unquote('')
+	for arg in args
+		subresult = subresult arg
+	if first
+		result = subresult
+		first = false
+	else
+		result = s('%s%s%s', result, unquote(string), subresult)
+	return result
+
+/*
+ * Background mixin
+ * e.g. bg: 'logo.png' (with specified IMAGE_PATH in 'settings')
+ * e.g. bg: '../img/logo.png' 100px 50px
+ */
+bg(path, args...)
+	args = unquote('no-repeat') unless args
+	background: url(IMAGE_PATH path) args
+
+/*
+ * Background mixin for retina displays
+ *
+ * use it together with '@media all and (-webkit-min-device-pixel-ratio: 1.5)'
+ */
+bg-retina(path, args...)
+	if args
+		bg: path, args
+	else
+		background-image: url(IMAGE_PATH path)
+	background-size: contain
+
+/*
+ * Image replacing mixin
+ * uses stylus' built-in image-size() does not support JPEG yet
+ * set dimensions by hand to use all formats and not depend on original
+ * e.g. image-block: 'test.png'
+ * e.g. image-block: 'test.jpg' 300 200
+ */
+image-block(path, dimensions...)
+	url = IMAGE_PATH + path
+
+	bg(path) if path
+	font: 0/0 a
+	text-shadow: none
+	color: transparent
+	if length(dimensions) > 0
+		size: dimensions[0] dimensions[1] if length(dimensions) == 2
+		size: dimensions[0] dimensions[0] if length(dimensions) == 1
+	else
+		size: image-size(url)[0] image-size(url)[1]
+
+/*
+ * Make single text line overflow
+ * e.g. text-overflow: 200 ellipsis
+ */
+text-overflow(width, type = ellipsis)
+	text-overflow: type
+	white-space: nowrap
+	overflow: hidden
+	width: width
+
+/*
+ * Hiding text mixin
+ * e.g. text-hide()
+ */
+text-hide()
+	text-indent: -9999px
+	white-space: nowrap
+	overflow: hidden
+
+/*
+ * Disallow user to select element
+ * e.g. no-select()
+ */
+no-select()
+	-webkit-touch-callout: none
+	-prefix(user-select, none)
+
+/*
+ * Creates triangle
+ * possible directions 'up', 'down', 'left', 'right'
+ * e.g. triangle: down 15px #F80
+ */
+triangle(direction = up, size = 10px, color = #000)
+	width: 0
+	height: 0
+
+	if direction == up
+		border-left: size solid transparent
+		border-right: size solid transparent
+		border-bottom: size solid color
+	else if direction == down
+		border-left: size solid transparent
+		border-right: size solid transparent
+		border-top: size solid color
+	else if direction == left
+		border-top: size solid transparent
+		border-bottom: size solid transparent
+		border-right: size solid color
+	else if direction == right
+		border-top: size solid transparent
+		border-bottom: size solid transparent
+		border-left: size solid color
+
+/*
+ * Custom animation timing functions
+ * http://www.ui-transitions.com/
+ */
+// ease-in
+ease-in-quad = cubic-bezier(0.550,  0.085, 0.680, 0.530)
+ease-in-cubic = cubic-bezier(0.550,  0.055, 0.675, 0.190)
+ease-in-quart = cubic-bezier(0.895,  0.030, 0.685, 0.220)
+ease-in-quint = cubic-bezier(0.755,  0.050, 0.855, 0.060)
+ease-in-sine = cubic-bezier(0.470,  0.000, 0.745, 0.715)
+ease-in-expo = cubic-bezier(0.950,  0.050, 0.795, 0.035)
+ease-in-circ = cubic-bezier(0.600,  0.040, 0.980, 0.335)
+ease-in-back = cubic-bezier(0.600, -0.280, 0.735, 0.045)
+
+// ease-out
+ease-out-quad = cubic-bezier(0.250,  0.460, 0.450, 0.940)
+ease-out-cubic = cubic-bezier(0.215,  0.610, 0.355, 1.000)
+ease-out-quart = cubic-bezier(0.165,  0.840, 0.440, 1.000)
+ease-out-quint = cubic-bezier(0.230,  1.000, 0.320, 1.000)
+ease-out-sine = cubic-bezier(0.390,  0.575, 0.565, 1.000)
+ease-out-expo = cubic-bezier(0.190,  1.000, 0.220, 1.000)
+ease-out-circ = cubic-bezier(0.075,  0.820, 0.165, 1.000)
+ease-out-back = cubic-bezier(0.175,  0.885, 0.320, 1.275)
+
+// ease-in-out
+ease-in-out-quad = cubic-bezier(0.455,  0.030, 0.515, 0.955)
+ease-in-out-cubic = cubic-bezier(0.645,  0.045, 0.355, 1.000)
+ease-in-out-quart = cubic-bezier(0.770,  0.000, 0.175, 1.000)
+ease-in-out-quint = cubic-bezier(0.860,  0.000, 0.070, 1.000)
+ease-in-out-sine = cubic-bezier(0.445,  0.050, 0.550, 0.950)
+ease-in-out-expo = cubic-bezier(1.000,  0.000, 0.000, 1.000)
+ease-in-out-circ = cubic-bezier(0.785,  0.135, 0.150, 0.860)
+ease-in-out-back = cubic-bezier(0.680, -0.550, 0.265, 1.550)

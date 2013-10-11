@@ -1,0 +1,18 @@
+IMAGE_PATH					?= ""
+SUPPORT_IE					?= false
+VENDORS 					?= moz webkit ms o official
+
+FONT_PRIMARY				?= unquote("Helvetica Neue, Helvetica, Arial, sans-serif")
+FONT_SECONDARY				?= unquote("Georgia, serif")
+FONT_SIZE					?= 14
+LINE_HEIGHT_RATIO 			?= 1.5
+LINE_HEIGHT 				?= round(FONT_SIZE * LINE_HEIGHT_RATIO)
+
+COLOR_BODY_BACKGROUND 		?= #FFFFFF
+COLOR_BODY_FONT				?= #444444
+COLOR_PRIMARY_BACKGROUND	?= #444444
+COLOR_PRIMARY_FONT			?= #FFFFFF
+COLOR_SECONDARY_BACKGROUND	?= #CCCCCC
+COLOR_SECONDARY_FONT		?= #333333
+
+RETINA_MEDIA				?= "(min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 1.5dppx)"
