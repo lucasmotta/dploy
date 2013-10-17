@@ -28,6 +28,7 @@
 
 .btn--space
 	overflow: hidden
+	transition: background 3s ease-out-expo, color 3s ease-out-expo
 
 	span
 		position: relative
@@ -37,9 +38,9 @@
 		absolute: top left
 		z-index: 5
 		size: 100%
-		bg: "space-normal.png" COLOR_PRIMARY_BACKGROUND repeat
+		bg: "space-normal.png" COLOR_SECONDARY_BACKGROUND repeat
 		animation: space 4s linear infinite
-		transition: opacity 5s ease-out-expo
+		transition: opacity 3s ease-out-expo
 		opacity: 0
 		border-radius: 6px
 
@@ -51,7 +52,7 @@
 			animation: space 10s linear infinite
 
 	&:hover
-		background: COLOR_PRIMARY_BACKGROUND
+		background: COLOR_SECONDARY_BACKGROUND
 
 		.fx
 			opacity: 1
