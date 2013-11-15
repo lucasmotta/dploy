@@ -3,6 +3,26 @@ body, html
 	min-height: 100%
 	background: COLOR_BODY_BACKGROUND
 
+pre, code
+	size: 100% auto
+	font-family: "Monaco", monospace, serif
+	font-size: 15px
+	color: COLOR_PRIMARY_BACKGROUND
+
+pre
+	position: relative
+	background: #FAFBFE
+	border: 1px solid #E6EBF9
+	border-radius: 6px
+	padding: 10px 10px 10px 80px
+	vertical-space: 0, 1
+	overflow: auto
+	max-width: 100%
+
+code
+	margin: 0
+	padding: 0
+
 .header
 	text-align: center
 	position: relative
@@ -27,6 +47,19 @@ body, html
 
 	p
 		margin-top: 15px
+
+.footer
+	text-align: center
+	position: relative
+	border-top: 2px solid #F2E7C8
+	padding: 20px 0 80px 0
+
+.lmfm
+	image-block: "lmfm.png" 229px 21px
+	display: inline-block
+
+	@media RETINA_MEDIA
+		bg-retina: "lmfm@2x.png" no-repeat
 
 .logo
 	display: inline-block
@@ -165,3 +198,39 @@ body, html
 	padding: 80px 10px 10px 10px
 
 
+
+.list
+	margin: 0
+	padding: 0
+	list-style: none
+
+.list--horizontal
+	padding: 0 0 10px 0
+
+	.list__item
+		display: inline-block
+		margin-left: 10px
+		line-height: 14px
+
+		&:after
+			content: ""
+			absolute: top 50% left -10px
+			size: 4px
+			border-radius: 50%
+			margin-top: -2px
+			background: COLOR_PRIMARY_BACKGROUND 
+
+
+		&:first-child
+			margin-left: 0
+			&:after
+				display: none
+
+.list__item
+	font-size: 12px
+	text-transform: uppercase
+	position: relative
+
+	a
+		font-weight: bold
+		color: COLOR_PRIMARY_BACKGROUND

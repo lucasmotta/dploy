@@ -16,7 +16,7 @@
 	line-height: 60px
 	padding: 0px 50px
 	font-size: 18
-	border-radius: 6px
+	border-radius: 4px
 
 	&:hover
 		color: white
@@ -25,6 +25,22 @@
 .btn--github
 	absolute: bottom -30px left 50%
 	transform: translate(-50%, 0)
+
+.btn--simple
+	border-radius: 3px !important
+	padding: 3px 5px !important
+	transition: background .5s ease-out-expo, color .5s ease-out-expo !important
+
+	&:hover
+		color: white !important
+
+		.fx
+			background-color: COLOR_PRIMARY_BACKGROUND !important
+
+	.fx
+		border-radius: 3px !important
+		background-color: COLOR_PRIMARY_BACKGROUND !important
+		transition: opacity .5s ease-out-expo !important
 
 .btn--space
 	overflow: hidden

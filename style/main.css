@@ -377,6 +377,30 @@ html {
   min-height: 100%;
   background: #fff;
 }
+pre,
+code {
+  width: 100%;
+  height: auto;
+  font-family: "Monaco", monospace, serif;
+  font-size: 15px;
+  color: #f84b45;
+}
+pre {
+  position: relative;
+  background: #fafbfe;
+  border: 1px solid #e6ebf9;
+  border-radius: 6px;
+  padding: 10px 10px 10px 80px;
+  margin-top: 0;
+  margin-bottom: 30px;
+  margin-bottom: 3rem;
+  overflow: auto;
+  max-width: 100%;
+}
+code {
+  margin: 0;
+  padding: 0;
+}
 .header {
   text-align: center;
   position: relative;
@@ -404,6 +428,27 @@ html {
 }
 .header__content p {
   margin-top: 15px;
+}
+.footer {
+  text-align: center;
+  position: relative;
+  border-top: 2px solid #f2e7c8;
+  padding: 20px 0 80px 0;
+}
+.lmfm {
+  background: url("../img/lmfm.png") no-repeat;
+  font: 0/0 a;
+  text-shadow: none;
+  color: transparent;
+  width: 229px;
+  height: 21px;
+  display: inline-block;
+}
+@media (min--moz-device-pixel-ratio: 1.5), (-o-min-device-pixel-ratio: 3/2), (-webkit-min-device-pixel-ratio: 1.5), (min-resolution: 1.5dppx) {
+  .lmfm {
+    background: url("../img/lmfm@2x.png") no-repeat;
+    background-size: contain;
+  }
 }
 .logo {
   display: inline-block;
@@ -650,6 +695,45 @@ html {
   margin: 0 auto;
   padding: 80px 10px 10px 10px;
 }
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.list--horizontal {
+  padding: 0 0 10px 0;
+}
+.list--horizontal .list__item {
+  display: inline-block;
+  margin-left: 10px;
+  line-height: 14px;
+}
+.list--horizontal .list__item:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: -10px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  margin-top: -2px;
+  background: #f84b45;
+}
+.list--horizontal .list__item:first-child {
+  margin-left: 0;
+}
+.list--horizontal .list__item:first-child:after {
+  display: none;
+}
+.list__item {
+  font-size: 12px;
+  text-transform: uppercase;
+  position: relative;
+}
+.list__item a {
+  font-weight: bold;
+  color: #f84b45;
+}
 body {
   font-family: futura-pt, Helvetica Neue, Helvetica, Arial, sans-serif;
   font-size: 20px;
@@ -690,7 +774,7 @@ h6,
 .h4,
 .h5,
 .h6 {
-  font-weight: normal;
+  font-weight: bold;
 }
 h1,
 .h1 {
@@ -700,7 +784,6 @@ h1,
   line-height: 6rem;
   margin-top: 0;
   margin-bottom: 0;
-  font-weight: bold;
 }
 h2,
 .h2 {
@@ -746,6 +829,9 @@ h6,
   line-height: 3rem;
   margin-top: 0;
   margin-bottom: 0;
+}
+.skinny {
+  font-weight: 100;
 }
 @-moz-keyframes space {
   0% {
@@ -1621,7 +1707,7 @@ h6,
   padding: 0px 50px;
   font-size: 18px;
   font-size: 1.8rem;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 .btn--primary:hover {
   color: #fff;
@@ -1636,6 +1722,30 @@ h6,
   -ms-transform: translate(-50%, 0);
   -o-transform: translate(-50%, 0);
   transform: translate(-50%, 0);
+}
+.btn--simple {
+  border-radius: 3px !important;
+  padding: 3px 5px !important;
+  -moz-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -webkit-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -ms-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -o-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+.btn--simple:hover {
+  color: #fff !important;
+}
+.btn--simple:hover .fx {
+  background-color: #f84b45 !important;
+}
+.btn--simple .fx {
+  border-radius: 3px !important;
+  background-color: #f84b45 !important;
+  -moz-transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -webkit-transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -ms-transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  -o-transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+  transition: opacity 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
 }
 .btn--space {
   overflow: hidden;
