@@ -454,7 +454,7 @@ code {
   display: inline-block;
   position: relative;
   overflow: hidden;
-  margin: 65px 0 15px 10px;
+  margin: 65px 0 -5px 10px;
   width: 193px;
   height: 193px;
   border-radius: 50%;
@@ -778,10 +778,10 @@ h6,
 }
 h1,
 .h1 {
-  font-size: 47px;
-  font-size: 4.7rem;
-  line-height: 60px;
-  line-height: 6rem;
+  font-size: 63px;
+  font-size: 6.3rem;
+  line-height: 90px;
+  line-height: 9rem;
   margin-top: 0;
   margin-bottom: 0;
 }
@@ -832,6 +832,18 @@ h6,
 }
 .skinny {
   font-weight: 100;
+}
+.narrow {
+  letter-spacing: -2px;
+}
+.spacy {
+  margin: 80px 0;
+}
+.primary-color {
+  color: #f84b45;
+}
+.secondary-color {
+  color: #073bc6;
 }
 @-moz-keyframes space {
   0% {
@@ -1725,12 +1737,17 @@ h6,
 }
 .btn--simple {
   border-radius: 3px !important;
-  padding: 3px 5px !important;
+  padding: 3px 5px;
   -moz-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
   -webkit-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
   -ms-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
   -o-transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
   transition: background 0.5s cubic-bezier(0.19, 1, 0.22, 1), color 0.5s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+.btn--simple span {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
 .btn--simple:hover {
   color: #fff !important;

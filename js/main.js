@@ -1,9 +1,7 @@
 var App;
 
 App = (function() {
-  function App() {
-    console.log("heu");
-  }
+  function App() {}
 
   return App;
 
