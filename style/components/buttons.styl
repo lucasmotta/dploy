@@ -30,6 +30,8 @@
 	border-radius: 3px !important
 	padding: 3px 5px
 	transition: background .5s ease-out-expo, color .5s ease-out-expo !important
+	overflow: hidden
+	position: relative
 
 	span
 		display: block
@@ -37,6 +39,7 @@
 
 	&:hover
 		color: white !important
+		background-color: transparent !important
 
 		.fx
 			background-color: COLOR_PRIMARY_BACKGROUND !important
@@ -58,7 +61,8 @@
 		absolute: top left
 		z-index: 5
 		size: 100%
-		bg: "space-normal.png" COLOR_SECONDARY_BACKGROUND repeat
+		bg: "space-normal.png" repeat
+		background-color: COLOR_SECONDARY_BACKGROUND
 		animation: space 4s linear infinite
 		transition: opacity 3s ease-out-expo
 		opacity: 0
