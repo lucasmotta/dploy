@@ -1,0 +1,32 @@
+dev:
+	scheme: ftp
+    host: ftp.my-dev-server.com
+    port: 21
+    user: user
+    pass: password
+    check: true
+    path:
+        local: release/
+        remote: public_html/
+
+stage:
+	scheme: ftp
+    host: ftp.my-stage-server.com
+    port: 21
+    user: user
+    pass: password
+    check: true
+    path:
+        local: release/
+        remote: public_html/
+
+live:
+	scheme: ftp
+    host: ftp.my-live-server.com
+    port: 21
+    user: user
+    pass: password
+    check: true
+    path:
+        local: release/
+        remote: public_html/
