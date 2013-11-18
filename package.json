@@ -1,16 +1,9 @@
 {
 	"name": "lmfm-dploy",
-	"version": "0.0.1",
+	"description": "DPLOY is an FTP/SFTP deployment tool built in node.js",
+	"homepage": "http://leanmeanfightingmachine.github.io/dploy/",
 	"dependencies": {
-		
-		"grunt-contrib-coffee": "~0.x.x",
-		"grunt-contrib-stylus": "~0.x.x",
-		"grunt-contrib-clean": "~0.x.x",
-		"grunt-contrib-watch": "~0.x.x",
-		
-		
-		"grunt-contrib-copy": "~0.x.x",
-		
-		"grunt-notify": "~0.x.x"
+		"grunt-contrib-stylus": "~0.10.x",
+		"grunt-contrib-watch": "~0.5.x"
 	}
 }
