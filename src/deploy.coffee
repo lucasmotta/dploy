@@ -308,7 +308,7 @@ module.exports = class Deploy
 			answer:
 				pattern: /y|n|Y|N/
 				description: "Are you sure you want to upload those files?".bold.red + " (y/n)"
-				message: "The answer should be YES (y) or NO (y)."
+				message: "The answer should be YES (y) or NO (n)."
 				required: true
 
 		if @toDelete.length
