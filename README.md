@@ -1,7 +1,12 @@
-**DPLOY** is a tool made in **node.js** that helps you and your team to deploy your website to FTP and SFTP without having to leave the comfort of your Terminal.  
-It uses **git** to upload only the files that were modified since the last deploy – **HOT STUFF**.
+# DPLOY
+
+**DPLOY is an FTP/SFTP deployment tool built in node.js**  
+Uploads the latest changes by comparing the version on your server with your git repository.
+
 
 ## Install
+Install DPLOY and it's dependancies globally by running:
+
 ```
 npm install dploy -g
 ```
@@ -30,7 +35,7 @@ In this case _DPLOY_ will expect to find **dev**, **stage** and **production** c
 If you only have one server, just name whatever you want and run `dploy`.   
 
 ```
-awesome:
+server_name:
     host: "ftp.myserver.com"
     user: "user"
     pass: "password"
@@ -48,7 +53,7 @@ dploy
 You can also set the environment that you want to upload:  
   
 ```
-dploy awesome
+dploy server_name
 ```
 
 ## Attributes of the dploy.yaml
@@ -202,7 +207,7 @@ This example will upload your local `deploy` folder to your remote `public_html`
 * Will **exclude** all `md` files from your `deploy` folder.
 
 ```
-awesome:
+server_name:
     host: "ftp.myserver.com"
     user: "user"
     pass: "password"
@@ -215,3 +220,24 @@ awesome:
         "*.json *.yaml *.xml": "data/"
             
 ```
+
+# Contribute
+Feel free to contribute to DPLOY in any way. If you have any issues, questions or suggestions, just create it at the issues page.  
+If you want to create your own fork, follow the instructions bellow to build **DPLOY**:  
+
+### build
+You need to install the dependencies from npm first and then just use grunt to compile the CoffeeScript:
+
+```
+grunt
+```
+
+### watch
+You can watch the changes by running the watch task from grunt:
+
+```
+grunt watch
+```
+
+# Mentions
+**DPLOY** was inspired by another great tool written in Ruby, called [dandelion](https://github.com/scttnlsn/dandelion) from [Scott Nelson](https://github.com/scttnlsn).
