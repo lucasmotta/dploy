@@ -15,6 +15,11 @@ module.exports = (grunt) ->
 				dest: "lib"
 				ext: ".js"
 		
+		# Bump files
+		bump:
+			options:
+				pushTo: "origin"
+
 
 		# Watch for changes
 		watch:
