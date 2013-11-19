@@ -181,16 +181,12 @@ module.exports = class Deploy
 			fs.writeFileSync @revisionPath, @local_hash
 
 			# If the remote revision file exists, let's get it's content
-			if typeof data is "string"
-				@remote_hash = data
-				@checkDiff @remote_hash, @local_hash
-			else
-				data.on "data", (e) =>
-					data.end()
-					@remote_hash = e.toString()
+			data.on "data", (e) =>
+				data.end()
+				@remote_hash = e.toString()
 
-					# Get the diff tree between the local and remote revisions 
-					@checkDiff @remote_hash, @local_hash
+				# Get the diff tree between the local and remote revisions
+				@checkDiff @remote_hash, @local_hash
 
 	# Get the diff tree between the local and remote revisions 
 	checkDiff: (old_rev, new_rev) ->
