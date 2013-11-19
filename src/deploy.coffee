@@ -109,7 +109,7 @@ module.exports = class Deploy
 	setupGit: ->
 		console.log "Connecting to ".bold.yellow + "#{@server}".bold.underline.yellow + "...".bold.yellow
 
-		exec "git log --pretty=format:'%H' -n 1", (error, stdout, stderr) =>
+		exec "git log --pretty=format:%H -n 1", (error, stdout, stderr) =>
 			return console.log "This is not a valid .git repository.".bold.red if error
 			@local_hash	= stdout
 
