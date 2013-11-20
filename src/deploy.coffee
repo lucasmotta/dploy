@@ -184,6 +184,7 @@ module.exports = class Deploy
 			data.on "data", (e) =>
 				data.end()
 				@remote_hash = e.toString()
+				@remote_hash = @remote_hash.replace /[\W]/g, ""
 
 				# Get the diff tree between the local and remote revisions
 				@checkDiff @remote_hash, @local_hash
