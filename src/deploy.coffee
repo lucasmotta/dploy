@@ -181,13 +181,15 @@ module.exports = class Deploy
 			fs.writeFileSync @revisionPath, @local_hash
 
 			# If the remote revision file exists, let's get it's content
-			data.on "data", (e) =>
-				data.end()
-				@remote_hash = e.toString()
-				@remote_hash = @remote_hash.replace /[\W]/g, ""
-
-				# Get the diff tree between the local and remote revisions
+			if typeof data is "string"
+				@remote_hash = @_removeSpecialChars(data)
 				@checkDiff @remote_hash, @local_hash
+			else
+				data.on "data", (e) =>
+					data.end()
+					@remote_hash = @_removeSpecialChars(e.toString())
+					@checkDiff @remote_hash, @local_hash
+
 
 	# Get the diff tree between the local and remote revisions 
 	checkDiff: (old_rev, new_rev) ->
@@ -470,3 +472,6 @@ module.exports = class Deploy
 			console.log "Upload completed for ".green + "#{@server}".bold.underline.green if displayMessage
 			@completed.dispatch()
 
+
+	# Remove special chars
+	_removeSpecialChars: (str) -> str.replace /[\W]/g, ""
