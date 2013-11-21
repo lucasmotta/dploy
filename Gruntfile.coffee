@@ -14,12 +14,25 @@ module.exports = (grunt) ->
 				src: ["**/*.coffee"]
 				dest: "lib"
 				ext: ".js"
-		
+
+		# CoffeeLint
+		coffeelint:
+			options:
+				no_tabs: level: "ignore"
+				indentation: level: "ignore"
+				max_line_length: level: "ignore"
+
+			source: ["src/**/*.coffee"]
+
 		# Bump files
 		bump:
 			options:
 				pushTo: "origin"
 
+		# Publish to NPM
+		shell:
+			publish:
+				command: "npm publish"
 
 		# Watch for changes
 		watch:
@@ -27,4 +40,8 @@ module.exports = (grunt) ->
 				files: ["src/**/*.coffee"]
 				tasks: ["coffee"]
 
-	grunt.registerTask "default", ["coffee"]
+
+	grunt.registerTask "default", ["coffeelint", "coffee"]
+	grunt.registerTask "release", "Release a new version, push it and publish", (target) ->
+		target ?= "patch"
+		grunt.task.run "coffeelint", "bump-only:#{target}", "coffee", "bump-commit", "shell:publish"
