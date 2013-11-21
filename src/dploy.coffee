@@ -23,7 +23,7 @@ module.exports = class DPLOY
 			# Check if we should ignore the include parameter for this deploy
 			@ignoreInclude = @servers.indexOf("-i") >= 0 or @servers.indexOf("--ignore-include") >= 0
 			# Remove the ignore flag from the server list
-			@servers = @servers.filter (value) -> value isnt "-i" and value isnt "--ignore-include" 
+			@servers = @servers.filter (value) -> value isnt "-i" and value isnt "--ignore-include"
 			# If you don't set any servers, add an empty one to upload the first environment only
 			@servers.push null if @servers.length is 0
 

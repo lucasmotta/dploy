@@ -20,8 +20,9 @@ module.exports = class Generator
 	_generateConfig: =>
 		fileName = "dploy.yaml"
 
-		# If the file does not exist, copy the generator example to user's folder
-		fs.createReadStream(path.resolve(__dirname, "../generator/dploy.yaml")).pipe(fs.createWriteStream(fileName)) unless fs.existsSync fileName
+		unless fs.existsSync fileName
+			# If the file does not exist, copy the generator example to user's folder
+			fs.createReadStream(path.resolve(__dirname, "../generator/dploy.yaml")).pipe(fs.createWriteStream(fileName))
 
 		@_dployCompleted.dispatch()
 
@@ -48,6 +49,7 @@ module.exports = class Generator
 		fs.appendFile fileName, content, (error) =>
 			if error
 				console.log "Error:".bold.red, "The post-commit file could not be created. Check the permissions of the folder.".red
+				console.log "\t #{error}"
 				return @_postCommitCompleted.dispatch()
 
 			fs.chmodSync fileName, "0755"

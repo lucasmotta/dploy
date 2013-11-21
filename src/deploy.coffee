@@ -3,7 +3,7 @@ path 		= require "path"
 fs			= require "fs"
 YAML		= require "yamljs"
 Signal		= require "signals"
-expand		= require "glob-expand"
+glob		= require "glob"
 minimatch	= require "minimatch"
 prompt		= require "prompt"
 exec		= require("child_process").exec
@@ -71,7 +71,7 @@ module.exports = class Deploy
 
 	# Set the default config
 	setupDefaultConfig: ->
-		@config.scheme ?= "ftp" 
+		@config.scheme ?= "ftp"
 		@config.port ?= (if @config.scheme is "ftp" then 21 else 22)
 		@config.slots ?= 1
 		@config.revision ?= ".rev"
@@ -167,7 +167,7 @@ module.exports = class Deploy
 		console.log "Checking revisions...".bold.yellow
 		
 		# Retrieve the revision file from the server so we can compare to our local one
-		@connection.get @config.path.remote + @config.revision, (error, data) =>
+		@connection.get path.normalize(@config.path.remote + @config.revision), (error, data) =>
 			# If the file was not found, we need to create one with HEAD hash
 			if error
 				fs.writeFile @revisionPath, @local_hash, (error) =>
@@ -191,7 +191,7 @@ module.exports = class Deploy
 					@checkDiff @remote_hash, @local_hash
 
 
-	# Get the diff tree between the local and remote revisions 
+	# Get the diff tree between the local and remote revisions
 	checkDiff: (old_rev, new_rev) ->
 		console.log "Checking diffs...".bold.yellow
 
@@ -260,13 +260,18 @@ module.exports = class Deploy
 
 	# Include extra files from the config file
 	includeExtraFiles: ->
-		return false if @ignoreInclude
+		return no if @ignoreInclude
 
 		for key of @config.include
-			files = expand({ filter: "isFile", cwd:process.cwd() }, key.split(" "))
+			files = glob.sync(key)
+			# Match the path of the key object to remove everything that is not a glob
+			match = path.dirname(key).match(/^[0-9a-zA-Z_\-/\\]+/)
 			for file in files
-				@toUpload.push name:file, remote:@config.include[key] + file
-		return true
+				# If there's any match for this key, we remove from the remote file name
+				remoteFile = if match and match.length then file.substring match[0].length else file
+
+				@toUpload.push name:file, remote:@config.include[key] + remoteFile
+		yes
 
 
 	# Method to check if you can upload those files or not
@@ -301,7 +306,7 @@ module.exports = class Deploy
 		yes
 	
 	askBeforeUpload: ->
-		return unless @hasFilesToUpload() 
+		return unless @hasFilesToUpload()
 
 		scheme = properties:
 			answer:
@@ -312,11 +317,14 @@ module.exports = class Deploy
 
 		if @toDelete.length
 			console.log "Files that will be deleted:".bold.red
-			console.log("[ ? ]".grey, "#{file.name}".red) for file in @toDelete
+			for file in @toDelete
+				console.log("[ ? ]".grey, "#{file.remote}".red)
 
 		if @toUpload.length
 			console.log "Files that will be uploaded:".bold.blue
-			console.log("[ ? ]".blue, "#{file.name}".blue) for file in @toUpload
+			for file in @toUpload
+				remoteFile = path.normalize @config.path.remote + file.remote
+				console.log("[ ? ]".blue, "#{file.name}".blue, ">".green, "#{remoteFile}".blue)
 
 		prompt.message = "Question"
 
@@ -330,18 +338,19 @@ module.exports = class Deploy
 
 
 	startUploads: ->
-		return unless @hasFilesToUpload() 
+		return unless @hasFilesToUpload()
 
 		@upload @connection
 		i = @config.slots - 1
 		@setupMultipleServers() while i-- > 0
+		return
 
 	hasFilesToUpload: ->
 		if @toUpload.length == 0 and @toDelete.length == 0
 			console.log "No files to upload".blue
 			@removeConnections()
-			return false
-		return true
+			return no
+		yes
 
 	upload: (server) ->
 		# Files to delete
@@ -362,10 +371,10 @@ module.exports = class Deploy
 
 
 		for item in @toDelete
-			return console.log "todelete", item.name if !item.completed
+			return if !item.completed
 
 		for item in @toUpload
-			return console.log "toupload", item.name if !item.completed
+			return if !item.completed
 
 		# Everything is updated, we can finish the process now.
 		@removeConnections()
@@ -388,8 +397,8 @@ module.exports = class Deploy
 				@uploadItem server, item
 				return
 
-			# Create the folder recursively in the server 
-			server.mkdir @config.path.remote + folder, (error) =>
+			# Create the folder recursively in the server
+			server.mkdir path.normalize(@config.path.remote + folder), (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -412,7 +421,7 @@ module.exports = class Deploy
 	# Upload the file to the remote path
 	uploadItem: (server, item) =>
 		# Set the entire remote path
-		remote_path = @config.path.remote + item.remote
+		remote_path = path.normalize(@config.path.remote + item.remote)
 
 		# Upload the file to the server
 		server.upload item.name, remote_path, (error) =>
@@ -432,7 +441,7 @@ module.exports = class Deploy
 		item.started = true
 
 		# Set the entire remote path
-		remote_path = @config.path.remote + item.remote
+		remote_path = path.normalize(@config.path.remote + item.remote)
 
 		# Delete the file from the server
 		server.delete remote_path, (error) =>

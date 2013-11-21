@@ -132,15 +132,14 @@ Exclude files that are tracked by git, but that you don't want on your server. Y
 * Default: `none`    
 
 The **include** parameter is similar to the **exclude**. But instead of an array, it expects an object.  
-The **key** of your object is what *DPLOY* is gonna search locally and the **value** of your object is the path of the remote server. Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
+The **key** of your object is what *DPLOY* is gonna search locally and the **value** of your object is the destination on the remote server (this path is relative to the **path.remote**!). Again you can also target individual files or multiple using [glob](https://github.com/isaacs/minimatch) on the key of your object.
 
 ```
 include:
-    "videos/kitty.mp4 videos/dog.mp4 videos/goat.mp4": "videos/"
-    "videos/*.mp4": "videos/"
-    "*.json *.yaml *.xml": "data/"
+    "videos/kitty.mp4": "videos/"
+    "videos/*.mp4": "another/folder/inside/remote/path/"
+    "*.json": "data/"
 ```
-_Note that you can set multiple patterns separated by a empty space on the key of your object_
 
 ## Ignore include flag
 If you are using the **include** parameter on your `dploy.yaml`, you will note that those files will always be uploaded to the server, no matter if they were modified or not (because they aren't necessarily tracked by git).  
