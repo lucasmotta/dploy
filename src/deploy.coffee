@@ -196,7 +196,7 @@ module.exports = class Deploy
 		# If any of the revisions is empty, add all
 		return @addAll() if not /([^\s])/.test(old_rev) or not /([^\s])/.test(new_rev)
 
-		console.log "Checking diffs between".bold.yellow, "[#{old_rev}]".yellow, ">".yellow, "[#{new_rev}]".yelow
+		console.log "Checking diffs between".bold.yellow, "[#{old_rev}]".yellow, ">".yellow, "[#{new_rev}]".yellow
 
 		# If both revisions are the same, our job is done.
 		# We can finish the process.
