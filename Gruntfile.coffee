@@ -27,7 +27,7 @@ module.exports = (grunt) ->
 		# Bump files
 		bump:
 			options:
-				pushTo: "origin"
+				pushTo: "origin master"
 
 		# Publish to NPM
 		shell:

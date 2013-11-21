@@ -193,7 +193,10 @@ module.exports = class Deploy
 
 	# Get the diff tree between the local and remote revisions
 	checkDiff: (old_rev, new_rev) ->
-		console.log "Checking diffs...".bold.yellow
+		# If any of the revisions is empty, add all
+		return @addAll() if not /([^\s])/.test(old_rev) or not /([^\s])/.test(new_rev)
+
+		console.log "Checking diffs between".bold.yellow, "[#{old_rev}]".yellow, ">".yellow, "[#{new_rev}]".yelow
 
 		# If both revisions are the same, our job is done.
 		# We can finish the process.
