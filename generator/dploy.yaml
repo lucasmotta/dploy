@@ -1,5 +1,5 @@
 dev:
-	scheme: ftp
+    scheme: ftp
     host: ftp.my-dev-server.com
     port: 21
     user: user
@@ -10,7 +10,7 @@ dev:
         remote: public_html/
 
 stage:
-	scheme: ftp
+    scheme: ftp
     host: ftp.my-stage-server.com
     port: 21
     user: user
@@ -21,7 +21,7 @@ stage:
         remote: public_html/
 
 live:
-	scheme: ftp
+    scheme: ftp
     host: ftp.my-live-server.com
     port: 21
     user: user
