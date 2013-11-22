@@ -3,7 +3,7 @@ path 		= require "path"
 fs			= require "fs"
 YAML		= require "yamljs"
 Signal		= require "signals"
-glob		= require "glob"
+expand		= require "glob-expand"
 minimatch	= require "minimatch"
 prompt		= require "prompt"
 exec		= require("child_process").exec
@@ -263,14 +263,18 @@ module.exports = class Deploy
 		return no if @ignoreInclude
 
 		for key of @config.include
-			files = glob.sync(key)
+			files = expand({ filter: "isFile", cwd:process.cwd() }, key)
 			# Match the path of the key object to remove everything that is not a glob
 			match = path.dirname(key).match(/^[0-9a-zA-Z_\-/\\]+/)
 			for file in files
 				# If there's any match for this key, we remove from the remote file name
+				# And we also clean the remote url
 				remoteFile = if match and match.length then file.substring match[0].length else file
+				remoteFile = @config.include[key] + remoteFile
+				remoteFile = remoteFile.replace(/(\/\/)/g, "/")
 
-				@toUpload.push name:file, remote:@config.include[key] + remoteFile
+				@toUpload.push name:file, remote:remoteFile
+
 		yes
 
 
