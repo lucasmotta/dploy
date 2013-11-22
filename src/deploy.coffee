@@ -167,7 +167,7 @@ module.exports = class Deploy
 		console.log "Checking revisions...".bold.yellow
 		
 		# Retrieve the revision file from the server so we can compare to our local one
-		@connection.get path.normalize(@config.path.remote + @config.revision), (error, data) =>
+		@connection.get @_constructRemotePath(path.normalize(@config.path.remote + @config.revision)), (error, data) =>
 			# If the file was not found, we need to create one with HEAD hash
 			if error
 				fs.writeFile @revisionPath, @local_hash, (error) =>
@@ -424,7 +424,7 @@ module.exports = class Deploy
 	# Upload the file to the remote path
 	uploadItem: (server, item) =>
 		# Set the entire remote path
-		remote_path = path.normalize(@config.path.remote + item.remote)
+		remote_path = @_constructRemotePath(path.normalize(@config.path.remote + item.remote))
 
 		# Upload the file to the server
 		server.upload item.name, remote_path, (error) =>
@@ -484,6 +484,8 @@ module.exports = class Deploy
 			console.log "Upload completed for ".green + "#{@server}".bold.underline.green if displayMessage
 			@completed.dispatch()
 
+	# Change backslashes to forward slashes on Windows
+	_constructRemotePath: (str) -> str.replace /\\+/g, "/"
 
 	# Remove special chars
 	_removeSpecialChars: (str) -> str.replace /[\W]/g, ""
