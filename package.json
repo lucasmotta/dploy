@@ -28,7 +28,7 @@
     "ssh2": "~0.2.x",
     "minimatch": "~0.2.x",
     "prompt": "~0.2.x",
-    "glob": "~3.2.x"
+    "glob-expand": "0.0.2"
   },
   "devDependencies": {
     "grunt": "~0.4.x",
