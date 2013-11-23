@@ -81,6 +81,29 @@ The port that your hosting server is using. Note that the default value is diffe
 * Type: `String`  
 * Default: `none`
 
+If you don't set a password and if you are using SFTP, DPLOY will try look for the **privateKey** and **publicKey**.  
+But if we can't find any of those options, you will be prompted to type the password manually.
+
+### privateKey
+* Type: `path`  
+* Default: `none`  
+
+When using SFTP, you can set the path of your private key instead of the password. The default locations are usually:
+```
+privateKey: ~/.ssh/id_rsa
+privateKey: ~/.ssh/id_dsa
+```
+
+### publicKey
+* Type: `path`  
+* Default: `none`  
+
+It works in the same way of the **privateKey**. The default locations are usually:
+```
+publicKey: ~/.ssh/id_rsa.pub
+publicKey: ~/.ssh/id_dsa.pub
+```
+
 ### revision
 * Type: `String`  
 * Default: `.rev`  

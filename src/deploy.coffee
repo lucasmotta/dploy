@@ -31,6 +31,13 @@ module.exports = class Deploy
 	isConnected 	: null
 	completed 		: null
 
+	###
+	@constructor
+
+	@param	config (optional)		Default configuration for this server
+	@param	server (optional)		Set the server to load from the YAML file
+	@param	ignoreInclude (false)	Ignore the 'include' tag
+	###
 	constructor: (@config, @server, @ignoreInclude = false) ->
 		@completed		= new Signal()
 		@connections	= []
@@ -40,9 +47,17 @@ module.exports = class Deploy
 		@dirCreated		= {}
 		@isConnected	= false
 
+		# Set the default messages for the prompt
+		prompt.message = "– ".red
+		prompt.delimiter = ""
+
+		# If you set a config file, go straight to the @configLoaded
+		# Otherwise load the dploy.yaml
 		if @config? then @configLoaded() else @loadYAML()
 
-	
+	###
+	Load the dploy.yaml, parse and find the current server
+	###
 	loadYAML: ->
 		# Load the config file
 		fs.readFile "dploy.yaml", (error, data) =>
@@ -65,15 +80,17 @@ module.exports = class Deploy
 
 			@configLoaded()
 
+	###
+	Method for when the config file is loaded
+	###
 	configLoaded: ->
-		# Setup the default configuration
-		@setupDefaultConfig()
+		@setupFallbackConfig()
+		@checkPassword @checkBranch
 
-		# Call git
-		@checkBranch()
-
-	# Set the default config
-	setupDefaultConfig: ->
+	###
+	Set the fallback configuration
+	###
+	setupFallbackConfig: ->
 		# If the server name doesn't exist, use the host name
 		@server ?= @config.host
 
@@ -94,39 +111,74 @@ module.exports = class Deploy
 
 		# Set the revision path
 		@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
+		
 		@
 
+	###
+	This method will double check for the password, publicKey and privateKey
+	If none of those are found, DPLOY will prompt you to type it
 
-	# Check if the branch you are working on can be deployed to that server
+	@param	callback 				The callback for when the password is found
+	###
+	checkPassword: (callback) ->
+		# If the password is set, just keep it going
+		return callback.call(this) if @config.pass
+
+		# Load the privateKey and publicKey if there's one (only for SFTP)
+		if @config.privateKey or @config.publicKey and @config.scheme is "sftp"
+			if @config.privateKey
+				@config.privateKey = fs.readFileSync @_resolveHomeFolder(@config.privateKey)
+			if @config.publicKey
+				@config.publicKey = fs.readFileSync @_resolveHomeFolder(@config.publicKey)
+
+			return callback.call(this)
+		
+		# If no password, privateKey or publicKey is found, prompt the user to enter the password
+		prompt.get [
+			name: "password"
+			description: "Enter the password for ".red + "#{@config.host}:".underline.bold.red
+			required: true
+			hidden: true
+			], (error, result) =>
+				@config.pass = result.password
+				callback.call(this)
+		return
+
+	###
+	Check if the branch you are working on can be deployed to that server
+	###
 	checkBranch: ->
 		return @setupGit() unless @config.branch
 
 		@config.branch = [@config.branch] if typeof @config.branch is "string"
 
 		exec "git rev-parse --abbrev-ref HEAD", (error, stdout, stderr) =>
-			return console.log "This is not a valid .git repository.".bold.red if error
-			currentBranch = stdout.replace /\s/g,''
+			return console.log "An error occurred when retrieving the current branch.".bold.red, error if error
+			currentBranch = stdout.replace /\s/g, ""
 
 			for branch in @config.branch
-				if currentBranch is branch
-					return @setupGit()
+				return @setupGit() if currentBranch is branch
 
 			console.log "Error: ".red.bold + "You are not allowed to deploy from ".red + "#{currentBranch}".bold.underline.red + " to ".red + "#{@server}".bold.underline.red
 			@removeConnections(false)
 
 
-	# Get the HEAD hash id so we can compare to the hash on the server
+	###
+	Get the HEAD hash id so we can compare to the hash on the server
+	###
 	setupGit: ->
 		console.log "Connecting to ".bold.yellow + "#{@server}".bold.underline.yellow + "...".bold.yellow
 
 		exec "git log --pretty=format:%H -n 1", (error, stdout, stderr) =>
-			return console.log "This is not a valid .git repository.".bold.red if error
+			return console.log "An error occurred when retrieving the local hash.".bold.red, error if error
 			@local_hash	= stdout
 
 			# Call the server
 			@setupServer()
 
-	# Connect to your server
+	###
+	Connect to the server and once it's done, check for the remote revision file
+	###
 	setupServer: ->
 		# Create a new instance of your server based on the scheme
 		@connection = if @config.scheme is "sftp" then new SFTP() else new FTP()
@@ -142,46 +194,33 @@ module.exports = class Deploy
 		# Connect using the config information
 		@connection.connect @config
 
-	# Create more connections of your server
+	###
+	Create more connections of your server for multiple uploads
+	###
 	setupMultipleServers: ->
 		con = if @config.scheme is "sftp" then new SFTP() else new FTP()
 		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
 			@numConnections++
-			@upload con
+			@nextOnQueue con
 
 		# Connect using the config information
-		con.connect
-			host		: @config.host
-			port		: @config.port
-			user		: @config.user
-			password	: @config.pass
+		con.connect @config
 
-
-	setFolderAsCreated: (folder) =>
-		i = folder.lastIndexOf "/"
-
-		return if @dirCreated[folder]
-
-		while i > 0
-			content = folder.slice 0, i
-			@dirCreated[content] = true
-			i = content.lastIndexOf "/"
-
-		@dirCreated[folder] = true
-
-
-	# Check if the revision files exist, if not we will have to create one.
+	###
+	Check if the revision files exist, if not we will create one
+	###
 	checkRevision: ->
 		console.log "Checking revisions...".bold.yellow
 		
 		# Retrieve the revision file from the server so we can compare to our local one
-		@connection.get @_constructRemotePath(path.normalize(@config.path.remote + @config.revision)), (error, data) =>
+		remotePath = @_constructRemotePath(path.normalize(@config.path.remote + @config.revision))
+		@connection.get remotePath, (error, data) =>
 			# If the file was not found, we need to create one with HEAD hash
 			if error
 				fs.writeFile @revisionPath, @local_hash, (error) =>
-					return console.log "Error creating revision file.".red if error
+					return console.log "Error creating revision file at:".red, "#{revisionPath}".red.bold.underline, error  if error
 
 					# Since this is our first upload, we will upload our entire local tree
 					@addAll()
@@ -201,7 +240,12 @@ module.exports = class Deploy
 					@checkDiff @remote_hash, @local_hash
 
 
-	# Get the diff tree between the local and remote revisions
+	###
+	Get the diff tree between the local and remote revisions
+
+	@param	old_rev					The remote hash, usually it's the old version
+	@param	new_rev					The local hash, usually the latest one
+	###
 	checkDiff: (old_rev, new_rev) ->
 		# If any of the revisions is empty, add all
 		return @addAll() if not /([^\s])/.test(old_rev) or not /([^\s])/.test(new_rev)
@@ -221,7 +265,7 @@ module.exports = class Deploy
 
 		# Call git to get the tree list of the modified items
 		exec "git diff --name-status #{old_rev} #{new_rev}", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
-			return console.log "This is not a valid .git repository. #{error}".bold.red if error
+			return console.log "An error occurred when retrieving the 'git diff --name-status #{old_rev} #{new_rev}'".bold.red, error if error
 
 			# Add the revision file
 			@toUpload.push name:@revisionPath, remote:@config.revision
@@ -246,17 +290,16 @@ module.exports = class Deploy
 			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 
-	# Add the entire tree to our "toUpload" group
+	###
+	Add the entire tree to our "toUpload" group
+	###
 	addAll: ->
 		console.log "Uploading files...".bold.yellow
 
 		# Call git to get the tree list of all our tracked files
 		exec "git ls-tree -r --name-only HEAD", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
-			return console.log "This is not a valid .git repository.".bold.red if error
+			return console.log "An error occurred when retrieving 'git ls-tree -r --name-only HEAD'".bold.red, error if error
 			
-			# Add the revision file
-			@toUpload.push name:@revisionPath, remote:@config.revision
-
 			# Split the lines to get individual files
 			files = stdout.split "\n"
 			for detail in files
@@ -265,13 +308,18 @@ module.exports = class Deploy
 
 				# Add them to our "toUpload" group
 				@toUpload.push name:detail, remote:remoteName if @canUpload detail
+
+			# Add the revision file
+			@toUpload.push name:@revisionPath, remote:@config.revision
 			
 			@includeExtraFiles()
 			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 			
 
-	# Include extra files from the config file
+	###
+	Include extra files from the config file
+	###
 	includeExtraFiles: ->
 		return no if @ignoreInclude
 
@@ -287,11 +335,15 @@ module.exports = class Deploy
 				remoteFile = remoteFile.replace(/(\/\/)/g, "/")
 
 				@toUpload.push name:file, remote:remoteFile
-
 		yes
 
 
-	# Method to check if you can upload those files or not
+	###
+	Method to check if you can upload those files or not
+
+	@param	name (string)			The local file name
+	@return <boolean> if you can delete or not
+	###
 	canUpload: (name) =>
 		# Return false if the name is empty
 		return no if name.length <= 0
@@ -307,7 +359,12 @@ module.exports = class Deploy
 
 		yes
 
-	# Method to check if you can delete those files or not
+	###
+	Method to check if you can delete those files or not
+
+	@param	name (string)			The local file name
+	@return <boolean> if you can delete or not
+	###
 	canDelete: (name) =>
 		# Return false if the name is empty
 		return no if name.length <= 0
@@ -322,15 +379,11 @@ module.exports = class Deploy
 				return no
 		yes
 	
+	###
+	Get the user's confirmation before uploading the file
+	###
 	askBeforeUpload: ->
 		return unless @hasFilesToUpload()
-
-		scheme = properties:
-			answer:
-				pattern: /y|n|Y|N/
-				description: "Are you sure you want to upload those files?".bold.red + " (y/n)"
-				message: "The answer should be YES (y) or NO (n)."
-				required: true
 
 		if @toDelete.length
 			console.log "Files that will be deleted:".bold.red
@@ -343,25 +396,35 @@ module.exports = class Deploy
 				remoteFile = path.normalize @config.path.remote + file.remote
 				console.log("[ ? ]".blue, "#{file.name}".blue, ">".green, "#{remoteFile}".blue)
 
-		prompt.message = "Question"
-
 		prompt.start()
-		prompt.get scheme, (error, result) =>
-			if result.answer.toLowerCase() == "y"
-				@startUploads()
-			else
-				console.log "Upload aborted by the user.".red
-				@removeConnections(false)
+		prompt.get [
+			name: "answer"
+			pattern: /y|n|Y|N/
+			description: "Are you sure you want to upload those files?".bold.red + " (Y/n)"
+			message: "The answer should be YES (y) or NO (n)."
+			], (error, result) =>
+				if result.answer.toLowerCase() is "y" or result.answer.toLowerCase() is ""
+					@startUploads()
+				else
+					console.log "Upload aborted by the user.".red
+					@removeConnections(false)
 
-
+	###
+	Start the upload and create the other connections if necessary
+	###
 	startUploads: ->
 		return unless @hasFilesToUpload()
 
-		@upload @connection
+		@nextOnQueue @connection
 		i = @config.slots - 1
 		@setupMultipleServers() while i-- > 0
 		return
 
+	###
+	Check if there's file to upload/delete
+
+	@return <boolean> if there's files or not
+	###
 	hasFilesToUpload: ->
 		if @toUpload.length == 0 and @toDelete.length == 0
 			console.log "No files to upload".blue
@@ -369,13 +432,18 @@ module.exports = class Deploy
 			return no
 		yes
 
-	upload: (server) ->
+	###
+	Upload or delete the next file in the queue
+	
+	@param	connection 				The FTP/SFTP connection to use
+	###
+	nextOnQueue: (connection) ->
 		# Files to delete
 		if @toDelete.length
 			# We loop between all the files that we need to delete until they are all done.
 			for item in @toDelete
 				unless item.started
-					@deleteItem server, item
+					@deleteItem connection, item
 					return
 
 		# Files to upload
@@ -383,23 +451,25 @@ module.exports = class Deploy
 			# We loop between all files that wee need to upload until they are all done
 			for item in @toUpload
 				unless item.started
-					@addItem server, item
+					@checkBeforeUpload connection, item
 					return
 
 
 		for item in @toDelete
-			return if !item.completed
+			return if not item.completed
 
 		for item in @toUpload
-			return if !item.completed
+			return if not item.completed
 
 		# Everything is updated, we can finish the process now.
 		@removeConnections()
 
 
-	# Check if the file is inside subfolders
-	# If it's is, create the folders first and then upload the file.
-	addItem: (server, item) =>
+	###
+	Check if the file is inside subfolders
+	If it's is, create the folders first and then upload the file.
+	###
+	checkBeforeUpload: (connection, item) =>
 		item.started = true
 
 		# Split the name to see if there's folders to create
@@ -411,11 +481,11 @@ module.exports = class Deploy
 			folder = nameSplit.join("/")
 
 			if @dirCreated[folder]
-				@uploadItem server, item
+				@uploadItem connection, item
 				return
 
 			# Create the folder recursively in the server
-			server.mkdir path.normalize(@config.path.remote + folder), (error) =>
+			connection.mkdir path.normalize(@config.path.remote + folder), (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -426,22 +496,27 @@ module.exports = class Deploy
 				
 				if error
 					item.started = false
-					@upload server
+					@nextOnQueue connection
 				else
 					# Upload the file once the folder is created
-					@uploadItem server, item
+					@uploadItem connection, item
 
 		else
 			# No folders need to be created, so we just upload the file
-			@uploadItem server, item
+			@uploadItem connection, item
 
-	# Upload the file to the remote path
-	uploadItem: (server, item) =>
+	###
+	Upload the file to the remote directory
+	
+	@param	connection 				The FTP/SFTP connection to use
+	@param 	item 					The item to upload
+	###
+	uploadItem: (connection, item) =>
 		# Set the entire remote path
 		remote_path = @_constructRemotePath(path.normalize(@config.path.remote + item.remote))
 
 		# Upload the file to the server
-		server.upload item.name, remote_path, (error) =>
+		connection.upload item.name, remote_path, (error) =>
 			if error
 				console.log "[ + ]".blue, "Fail uploading file #{item.name}:".red, error
 				item.started = false
@@ -451,28 +526,53 @@ module.exports = class Deploy
 				item.completed = true
 
 			# Keep uploading the rest
-			@upload server
+			@nextOnQueue connection
 
-	# Delete an item from the remote server
-	deleteItem: (server, item) =>
+	###
+	Delete an item from the remote server
+
+	@param	connection 				The FTP/SFTP connection to use
+	@param 	item 					The item to delete
+	###
+	deleteItem: (connection, item) =>
 		item.started = true
 
 		# Set the entire remote path
 		remote_path = path.normalize(@config.path.remote + item.remote)
 
 		# Delete the file from the server
-		server.delete remote_path, (error) =>
+		connection.delete remote_path, (error) =>
 			if error
-				console.log "[ × ]".grey, "Fail deleting file #{item.name}:".red
+				console.log "[ × ]".grey, "Fail deleting file #{remote_path}:".red
 			else
-				console.log "[ × ]".grey, "File Deleted: #{item.name}:".grey
+				console.log "[ × ]".grey, "File deleted: #{remote_path}:".grey
 
 			item.completed = true
 
 			# Keep uploading the rest
-			@upload server
+			@nextOnQueue connection
+	
+	###
+	When we are creating the folders in the remote server we got make sure
+	we don't try to rec-reate they, otherwise expect chaos
+	###
+	setFolderAsCreated: (folder) =>
+		i = folder.lastIndexOf "/"
 
+		return if @dirCreated[folder]
 
+		while i > 0
+			content = folder.slice 0, i
+			@dirCreated[content] = true
+			i = content.lastIndexOf "/"
+
+		@dirCreated[folder] = true
+
+	###
+	Remove/destroy all connections
+
+	@param displayMessage <true>	Set if you want to display a message for when the upload is completed
+	###
 	removeConnections: (displayMessage = true) =>
 		if @numConnections > 0
 			for con in @connections
@@ -483,7 +583,9 @@ module.exports = class Deploy
 		else
 			@complete(displayMessage)
 
-	# Dispose the connections
+	###
+	Remove/destroy all connections
+	###
 	dispose: =>
 		if @completed
 			con.dispose() for con in @connections
@@ -491,15 +593,26 @@ module.exports = class Deploy
 			@completed.dispose()
 			@completed = null
 
-	# Everything is completed.
+	###
+	When everything is completed
+
+	@param displayMessage <true>	Set if you want to display a message for when the upload is completed
+	###
 	complete: (displayMessage) =>
-		# Delete the revision file and complete :)
+		# Delete the revision file localy and complete :)
 		fs.unlink @revisionPath, (err) =>
 			console.log "Upload completed for ".green + "#{@server}".bold.underline.green if displayMessage
 			@completed.dispatch()
+
 
 	# Change backslashes to forward slashes on Windows
 	_constructRemotePath: (str) -> str.replace /\\+/g, "/"
 
 	# Remove special chars
 	_removeSpecialChars: (str) -> str.replace /[\W]/g, ""
+
+	# Resolve User's home folder
+	_resolveHomeFolder: (str) ->
+		homeFolder = (process.env.HOME || process.env.HOMEPATH || process.env.USERPROFILE)
+		return path.resolve path.join(homeFolder, str.substr(1)) if str.substr(0, 1) is "~"
+		str
