@@ -31,7 +31,7 @@ module.exports = class Deploy
 	isConnected 	: null
 	completed 		: null
 
-	constructor: (@server, @ignoreInclude = false) ->
+	constructor: (@config, @server, @ignoreInclude = false) ->
 		@completed		= new Signal()
 		@connections	= []
 		@numConnections	= 0
@@ -40,6 +40,10 @@ module.exports = class Deploy
 		@dirCreated		= {}
 		@isConnected	= false
 
+		if @config? then @configLoaded() else @loadYAML()
+
+	
+	loadYAML: ->
 		# Load the config file
 		fs.readFile "dploy.yaml", (error, data) =>
 			if error
@@ -59,18 +63,20 @@ module.exports = class Deploy
 				return console.log "Error:".bold.red, "We couldn't find the settings for " + "#{@server}".bold.red
 				process.exit(code=0)
 
+			@configLoaded()
 
-			# Setup the default configuration
-			@setupDefaultConfig()
+	configLoaded: ->
+		# Setup the default configuration
+		@setupDefaultConfig()
 
-			# Set the revision path
-			@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
-
-			# Call git
-			@checkBranch()
+		# Call git
+		@checkBranch()
 
 	# Set the default config
 	setupDefaultConfig: ->
+		# If the server name doesn't exist, use the host name
+		@server ?= @config.host
+
 		@config.scheme ?= "ftp"
 		@config.port ?= (if @config.scheme is "ftp" then 21 else 22)
 		@config.slots ?= 1
@@ -85,6 +91,10 @@ module.exports = class Deploy
 		regExpPath = new RegExp("(.*[^/]$)")
 		@config.path.local = @config.path.local.replace(regExpPath, "$1/") if @config.path.local isnt ""
 		@config.path.remote = @config.path.remote.replace(regExpPath, "$1/") if @config.path.remote isnt ""
+
+		# Set the revision path
+		@revisionPath = if @config.path.local then @config.path.local + @config.revision else @config.revision
+		@
 
 
 	# Check if the branch you are working on can be deployed to that server

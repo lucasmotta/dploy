@@ -10,13 +10,25 @@ module.exports = class DPLOY
 	connection		: null
 	ignoreInclude	: false
 
-	constructor: ->
+	###
+	DPLOY
+	If you set a custom config file for DPLOY
+	It will use this config instead of trying to load a dploy.yaml file
+	
+	@param 	config (optional)		Custom config file of a server to deploy at
+	@param 	completed (optional)	Callback for when the entire proccess is completed
+	###
+	constructor: (@config, @completed) ->
+		# DPLOY if there's a custom config
+		if @config
+			@servers = [null]
+			return @deploy()
 		# Call the DPLOY generator
-		if process.argv.indexOf("install") >= 0
-			new Generator()
+		else if process.argv.indexOf("install") >= 0
+			return new Generator()
 		# Open the help
-		else if process.argv.indexOf("--help") >= 0 or process.argv.indexOf("-h") >= 0
-			new Help()
+		else if (process.argv.indexOf("--help") >= 0 or process.argv.indexOf("-h") >= 0)
+			return new Help()
 		# Deploy
 		else
 			@servers = process.argv.splice(2, process.argv.length)
@@ -37,10 +49,13 @@ module.exports = class DPLOY
 
 		# Keep deploying until all servers are updated
 		if @servers.length
-			@connection = new Deploy @servers[0], @ignoreInclude
+			@connection = new Deploy @config, @servers[0], @ignoreInclude
 			@connection.completed.add @deploy
 			@servers.shift()
 		# Finish the process
 		else
 			console.log "All Completed :)".green.bold
+			@completed.call(@) if @completed
 			process.exit(code=0)
+
+		return @
