@@ -26,10 +26,12 @@ module.exports = class FTP
 	###
 	connect: (config) ->
 		@connection.connect
-			host		: config.host
-			port		: config.port
-			user		: config.user
-			password	: config.pass
+			host			: config.host
+			port			: config.port
+			user			: config.user
+			password		: config.pass
+			secure			: config.secure
+			secureOptions	: config.secureOptions
 
 	###
 	Close the connection

@@ -87,6 +87,7 @@ But if we can't find any of those options, you will be prompted to type the pass
 ### privateKey
 * Type: `path`  
 * Default: `none`  
+* Scheme: `sftp`  
 
 When using SFTP, you can set the path of your private key instead of the password. The default locations are usually:
 ```
@@ -97,12 +98,27 @@ privateKey: ~/.ssh/id_dsa
 ### publicKey
 * Type: `path`  
 * Default: `none`  
+* Scheme: `sftp`  
 
 It works in the same way of the **privateKey**. The default locations are usually:
 ```
 publicKey: ~/.ssh/id_rsa.pub
 publicKey: ~/.ssh/id_dsa.pub
 ```
+
+### secure
+* Type: `mixed`  
+* Default: `false`  
+* Scheme: `ftp`  
+
+Set this parameter only if you are using FTPS. Set to `true` for both control and data connection encryption, `control` for control connection encryption only, or `implicit` for implicitly encrypted control connection.
+
+### secureOptions
+* Type: `object`  
+* Default: `none`  
+* Scheme: `ftp`  
+
+Additional options to be passed together with the `secure` parameter.
 
 ### revision
 * Type: `String`  

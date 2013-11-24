@@ -96,6 +96,8 @@ module.exports = class Deploy
 
 		@config.scheme ?= "ftp"
 		@config.port ?= (if @config.scheme is "ftp" then 21 else 22)
+		@config.secure ?= false
+		@config.secureOptions ?= {}
 		@config.slots ?= 1
 		@config.revision ?= ".rev"
 		@config.path ?= {}
