@@ -222,7 +222,7 @@ module.exports = class Deploy
 			# If the file was not found, we need to create one with HEAD hash
 			if error
 				fs.writeFile @revisionPath, @local_hash, (error) =>
-					return console.log "Error creating revision file at:".red, "#{revisionPath}".red.bold.underline, error  if error
+					return console.log "Error creating revision file at:".red, "#{@revisionPath}".red.bold.underline, error if error
 
 					# Since this is our first upload, we will upload our entire local tree
 					@addAll()
