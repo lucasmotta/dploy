@@ -395,7 +395,7 @@ module.exports = class Deploy
 		if @toUpload.length
 			console.log "Files that will be uploaded:".bold.blue
 			for file in @toUpload
-				remoteFile = path.normalize @config.path.remote + file.remote
+				remoteFile = @_constructRemotePath(path.normalize(@config.path.remote + file.remote))
 				console.log("[ ? ]".blue, "#{file.name}".blue, ">".green, "#{remoteFile}".blue)
 
 		prompt.start()
