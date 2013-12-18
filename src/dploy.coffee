@@ -55,7 +55,9 @@ module.exports = class DPLOY
 		# Finish the process
 		else
 			console.log "All Completed :)".green.bold
-			@completed.call(@) if @completed
-			process.exit(code=0)
+			if @completed
+				@completed.call(@)
+			else
+				process.exit(code=0)
 
 		return @
