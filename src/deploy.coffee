@@ -108,6 +108,7 @@ module.exports = class Deploy
 
 		# Fix the paths
 		regExpPath = new RegExp("(.*[^/]$)")
+		@config.path.local = "" if @config.path.local is "/"
 		@config.path.local = @config.path.local.replace(regExpPath, "$1/") if @config.path.local isnt ""
 		@config.path.remote = @config.path.remote.replace(regExpPath, "$1/") if @config.path.remote isnt ""
 
