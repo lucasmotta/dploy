@@ -8,9 +8,6 @@ minimatch	= require "minimatch"
 prompt		= require "prompt"
 exec		= require("child_process").exec
 
-FTP 	= require "./scheme/ftp"
-SFTP 	= require "./scheme/sftp"
-
 
 module.exports = class Deploy
 
@@ -184,7 +181,7 @@ module.exports = class Deploy
 	###
 	setupServer: ->
 		# Create a new instance of your server based on the scheme
-		@connection = if @config.scheme is "sftp" then new SFTP() else new FTP()
+		@connection = new require("./scheme/#{@config.scheme}")()
 		@connection.failed.add => return console.log "Connection failed.".bold.red unless @isConnected
 		@connection.connected.add =>
 			@isConnected = true
@@ -201,7 +198,7 @@ module.exports = class Deploy
 	Create more connections of your server for multiple uploads
 	###
 	setupMultipleServers: ->
-		con = if @config.scheme is "sftp" then new SFTP() else new FTP()
+		con = new require("./scheme/#{@config.scheme}")()
 		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
