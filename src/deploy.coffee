@@ -181,7 +181,8 @@ module.exports = class Deploy
 	###
 	setupServer: ->
 		# Create a new instance of your server based on the scheme
-		@connection = new require("./scheme/#{@config.scheme}")()
+		scheme = require("./scheme/#{@config.scheme}")
+		@connection = new scheme()
 		@connection.failed.add => return console.log "Connection failed.".bold.red unless @isConnected
 		@connection.connected.add =>
 			@isConnected = true
@@ -198,7 +199,8 @@ module.exports = class Deploy
 	Create more connections of your server for multiple uploads
 	###
 	setupMultipleServers: ->
-		con = new require("./scheme/#{@config.scheme}")()
+		scheme = require("./scheme/#{@config.scheme}")
+		con = new scheme()
 		con.connected.add =>
 			# Once is connected, check the revision files
 			@connections.push con
