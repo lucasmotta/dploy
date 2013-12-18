@@ -487,7 +487,7 @@ module.exports = class Deploy
 				return
 
 			# Create the folder recursively in the server
-			connection.mkdir path.normalize(@config.path.remote + folder), (error) =>
+			connection.mkdir @_constructRemotePath(path.normalize(@config.path.remote + folder)), (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -540,7 +540,7 @@ module.exports = class Deploy
 		item.started = true
 
 		# Set the entire remote path
-		remote_path = path.normalize(@config.path.remote + item.remote)
+		remote_path = @_constructRemotePath(path.normalize(@config.path.remote + item.remote))
 
 		# Delete the file from the server
 		connection.delete remote_path, (error) =>
