@@ -217,7 +217,7 @@ module.exports = class Deploy
 		console.log "Checking revisions...".bold.yellow
 		
 		# Retrieve the revision file from the server so we can compare to our local one
-		remotePath = @_constructRemotePath(path.normalize(@config.path.remote + @config.revision))
+		remotePath = @_normalize(@config.path.remote + @config.revision)
 		@connection.get remotePath, (error, data) =>
 			# If the file was not found, we need to create one with HEAD hash
 			if error
@@ -395,7 +395,7 @@ module.exports = class Deploy
 		if @toUpload.length
 			console.log "Files that will be uploaded:".bold.blue
 			for file in @toUpload
-				remoteFile = @_constructRemotePath(path.normalize(@config.path.remote + file.remote))
+				remoteFile = @_normalize(@config.path.remote + file.remote)
 				console.log("[ ? ]".blue, "#{file.name}".blue, ">".green, "#{remoteFile}".blue)
 
 		prompt.start()
@@ -487,7 +487,7 @@ module.exports = class Deploy
 				return
 
 			# Create the folder recursively in the server
-			connection.mkdir @_constructRemotePath(path.normalize(@config.path.remote + folder)), (error) =>
+			connection.mkdir @_normalize(@config.path.remote + folder), (error) =>
 				unless @dirCreated[folder]
 					if error
 						# console.log "[ + ]".green, "Fail creating directory: #{folder}:".red
@@ -515,7 +515,7 @@ module.exports = class Deploy
 	###
 	uploadItem: (connection, item) =>
 		# Set the entire remote path
-		remote_path = @_constructRemotePath(path.normalize(@config.path.remote + item.remote))
+		remote_path = @_normalize(@config.path.remote + item.remote)
 
 		# Upload the file to the server
 		connection.upload item.name, remote_path, (error) =>
@@ -540,7 +540,7 @@ module.exports = class Deploy
 		item.started = true
 
 		# Set the entire remote path
-		remote_path = @_constructRemotePath(path.normalize(@config.path.remote + item.remote))
+		remote_path = @_normalize(@config.path.remote + item.remote)
 
 		# Delete the file from the server
 		connection.delete remote_path, (error) =>
@@ -608,7 +608,7 @@ module.exports = class Deploy
 
 
 	# Change backslashes to forward slashes on Windows
-	_constructRemotePath: (str) -> str.replace /\\+/g, "/"
+	_normalize: (str) -> path.normalize(str).replace /\\+/g, "/"
 
 	# Remove special chars
 	_removeSpecialChars: (str) -> str.replace /[\W]/g, ""
