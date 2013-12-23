@@ -3,6 +3,7 @@ colors	= require "colors"
 Deploy = require "./deploy"
 Generator = require "./generator"
 Help = require "./help"
+Version = require "./version"
 
 module.exports = class DPLOY
 
@@ -29,6 +30,9 @@ module.exports = class DPLOY
 		# Open the help
 		else if (process.argv.indexOf("--help") >= 0 or process.argv.indexOf("-h") >= 0)
 			return new Help()
+		# Print version
+		else if process.argv.indexOf("--version") >= 0 or process.argv.indexOf("-v") >= 0
+			return new Version()
 		# Deploy
 		else
 			@servers = process.argv.splice(2, process.argv.length)
