@@ -7,7 +7,9 @@ module.exports = class Generator
 
 
 	constructor: ->
-		usage  = "DPLOY\n".bold
+		packageConfig = require "../package.json"
+
+		usage  = "DPLOY v#{packageConfig.version}\n".bold
 		usage += "Command line tool to deploy websites using FTP/SFTP and git.\n\n".grey
 
 		usage += "Usage:\n"
@@ -16,6 +18,7 @@ module.exports = class Generator
 		usage += "Commands:\n"
 		usage += "  install \t\t #{'# Install the dploy.yaml and the post-commit script'.grey}\n"
 		usage += "  -h, --help \t\t #{'# Show this instructions'.grey}\n\n"
+		usage += "  -v, --version \t\t #{'# Show the current version of DPLOY'.grey}\n\n"
 
 		usage += "Flags:\n"
 		usage += "  -i, --ignore-include \t #{'# Ignore the files that are on your include list'.grey}\n\n"

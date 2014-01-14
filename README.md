@@ -16,6 +16,11 @@ npm install dploy -g
 dploy --help
 ```
 
+## Version
+```
+dploy --version
+```
+
 ## Commands
 ### dploy
 Will deploy the first environment that you have on your `dploy.yaml`
