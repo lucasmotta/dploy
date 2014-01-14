@@ -100,6 +100,13 @@ privateKey: ~/.ssh/id_rsa
 privateKey: ~/.ssh/id_dsa
 ```
 
+### passphrase
+* Type: `String`  
+* Default: `none`  
+* Scheme: `sftp`  
+
+For an encrypted private key, this is the passphrase used to decrypt it.
+
 ### publicKey
 * Type: `path`  
 * Default: `none`  
