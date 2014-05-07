@@ -269,9 +269,6 @@ module.exports = class Deploy
 		exec "git diff --name-status #{old_rev} #{new_rev}", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
 			return console.log "An error occurred when retrieving the 'git diff --name-status #{old_rev} #{new_rev}'".bold.red, error if error
 
-			# Add the revision file
-			@toUpload.push name:@revisionPath, remote:@config.revision
-
 			# Split the lines to get a list of items
 			files = stdout.split "\n"
 			for detail in files
@@ -289,6 +286,10 @@ module.exports = class Deploy
 						@toUpload.push name:data[1], remote:remoteName if @canUpload data[1]
 
 			@includeExtraFiles()
+
+			# Add the revision file
+			@toUpload.push name:@revisionPath, remote:@config.revision
+			
 			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 
@@ -311,10 +312,11 @@ module.exports = class Deploy
 				# Add them to our "toUpload" group
 				@toUpload.push name:detail, remote:remoteName if @canUpload detail
 
+			@includeExtraFiles()
+
 			# Add the revision file
 			@toUpload.push name:@revisionPath, remote:@config.revision
 			
-			@includeExtraFiles()
 			if @config.check then @askBeforeUpload() else @startUploads()
 			return
 			
