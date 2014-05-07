@@ -205,6 +205,17 @@ Or using a shortcut:
 dploy stage -i
 ```
 
+## Catchup flag
+If you already have your files on the server (from a previous manual upload or if you somehow deleted the revision file), setting this flag will upload only the revision file and nothing more. It can be used for multiple servers too.
+  
+```
+dploy stage --catchup
+```  
+Or using a shortcut:  
+  
+```
+dploy stage -c
+```
 
 ## Multiple environments
 Most of the times we have to work on different environments (dev, stage, production…).  

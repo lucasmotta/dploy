@@ -10,6 +10,7 @@ module.exports = class DPLOY
 	servers			: null
 	connection		: null
 	ignoreInclude	: false
+	catchup			: false
 
 	###
 	DPLOY
@@ -38,6 +39,8 @@ module.exports = class DPLOY
 			@servers = process.argv.splice(2, process.argv.length)
 			# Check if we should ignore the include parameter for this deploy
 			@ignoreInclude = @servers.indexOf("-i") >= 0 or @servers.indexOf("--ignore-include") >= 0
+			# Check if we should catchup with the server and only upload the revision file
+			@catchup = @servers.indexOf("-c") >= 0 or @servers.indexOf("--catchup") >= 0
 			# Remove the ignore flag from the server list
 			@servers = @servers.filter (value) -> value isnt "-i" and value isnt "--ignore-include"
 			# If you don't set any servers, add an empty one to upload the first environment only
@@ -53,7 +56,7 @@ module.exports = class DPLOY
 
 		# Keep deploying until all servers are updated
 		if @servers.length
-			@connection = new Deploy @config, @servers[0], @ignoreInclude
+			@connection = new Deploy @config, @servers[0], @ignoreInclude, @catchup
 			@connection.completed.add @deploy
 			@servers.shift()
 		# Finish the process

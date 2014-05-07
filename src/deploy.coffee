@@ -34,8 +34,9 @@ module.exports = class Deploy
 	@param	config (optional)		Default configuration for this server
 	@param	server (optional)		Set the server to load from the YAML file
 	@param	ignoreInclude (false)	Ignore the 'include' tag
+	@param	catchup (false)			Catchup with the server and only uploads the revision file
 	###
-	constructor: (@config, @server, @ignoreInclude = false) ->
+	constructor: (@config, @server, @ignoreInclude = false, @catchup = false) ->
 		@completed		= new Signal()
 		@connections	= []
 		@numConnections	= 0
@@ -269,23 +270,24 @@ module.exports = class Deploy
 		exec "git diff --name-status #{old_rev} #{new_rev}", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
 			return console.log "An error occurred when retrieving the 'git diff --name-status #{old_rev} #{new_rev}'".bold.red, error if error
 
-			# Split the lines to get a list of items
-			files = stdout.split "\n"
-			for detail in files
-				# Check if the file was deleted, modified or added
-				data = detail.split "\t"
-				if data.length > 1
-					# If you set a local path, we need to replace the remote name to match the remote path
-					remoteName = if @config.path.local then data[1].split(@config.path.local).join("") else data[1]
+			unless @catchup
+				# Split the lines to get a list of items
+				files = stdout.split "\n"
+				for detail in files
+					# Check if the file was deleted, modified or added
+					data = detail.split "\t"
+					if data.length > 1
+						# If you set a local path, we need to replace the remote name to match the remote path
+						remoteName = if @config.path.local then data[1].split(@config.path.local).join("") else data[1]
 
-					# The file was deleted
-					if data[0] == "D"
-						@toDelete.push name:data[1], remote:remoteName if @canDelete data[1]
-					# Everything else
-					else
-						@toUpload.push name:data[1], remote:remoteName if @canUpload data[1]
+						# The file was deleted
+						if data[0] == "D"
+							@toDelete.push name:data[1], remote:remoteName if @canDelete data[1]
+						# Everything else
+						else
+							@toUpload.push name:data[1], remote:remoteName if @canUpload data[1]
 
-			@includeExtraFiles()
+				@includeExtraFiles()
 
 			# Add the revision file
 			@toUpload.push name:@revisionPath, remote:@config.revision
@@ -303,16 +305,17 @@ module.exports = class Deploy
 		exec "git ls-tree -r --name-only HEAD", { maxBuffer: 5000*1024 }, (error, stdout, stderr) =>
 			return console.log "An error occurred when retrieving 'git ls-tree -r --name-only HEAD'".bold.red, error if error
 			
-			# Split the lines to get individual files
-			files = stdout.split "\n"
-			for detail in files
-				# If you set a local path, we need to replace the remote name to match the remote path
-				remoteName = if @config.path.local then detail.split(@config.path.local).join("") else detail
+			unless @catchup
+				# Split the lines to get individual files
+				files = stdout.split "\n"
+				for detail in files
+					# If you set a local path, we need to replace the remote name to match the remote path
+					remoteName = if @config.path.local then detail.split(@config.path.local).join("") else detail
 
-				# Add them to our "toUpload" group
-				@toUpload.push name:detail, remote:remoteName if @canUpload detail
+					# Add them to our "toUpload" group
+					@toUpload.push name:detail, remote:remoteName if @canUpload detail
 
-			@includeExtraFiles()
+				@includeExtraFiles()
 
 			# Add the revision file
 			@toUpload.push name:@revisionPath, remote:@config.revision
@@ -325,7 +328,7 @@ module.exports = class Deploy
 	Include extra files from the config file
 	###
 	includeExtraFiles: ->
-		return no if @ignoreInclude
+		return no if @ignoreInclude or @catchup
 
 		for key of @config.include
 			files = expand({ filter: "isFile", cwd:process.cwd() }, key)
