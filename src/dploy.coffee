@@ -41,8 +41,8 @@ module.exports = class DPLOY
 			@ignoreInclude = @servers.indexOf("-i") >= 0 or @servers.indexOf("--ignore-include") >= 0
 			# Check if we should catchup with the server and only upload the revision file
 			@catchup = @servers.indexOf("-c") >= 0 or @servers.indexOf("--catchup") >= 0
-			# Remove the ignore flag from the server list
-			@servers = @servers.filter (value) -> value isnt "-i" and value isnt "--ignore-include"
+			# Filter the flags from the server names
+			@servers = @_filterFlags @servers, ["-i", "--ignore-include", "-c", "--catchup"]
 			# If you don't set any servers, add an empty one to upload the first environment only
 			@servers.push null if @servers.length is 0
 
@@ -68,3 +68,11 @@ module.exports = class DPLOY
 				process.exit(code=0)
 
 		return @
+
+
+	_filterFlags: (servers, flags) ->
+		servers = servers.filter (value) ->
+			valid = true
+			flags.forEach (flag) -> valid = false if flag is value
+			return valid
+		servers
