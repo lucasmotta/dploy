@@ -357,7 +357,7 @@ module.exports = class Deploy
 			return no if name.indexOf(@config.path.local) < 0
 
 		for exclude in @config.exclude
-			return no if minimatch(name, exclude)
+			return no if minimatch(name, exclude, { dot: true })
 
 		yes
 
