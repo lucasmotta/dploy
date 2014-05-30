@@ -21,6 +21,7 @@ module.exports = class Generator
 		usage += "  -v, --version \t\t #{'# Show the current version of DPLOY'.grey}\n\n"
 
 		usage += "Flags:\n"
+		usage += "  -c, --catchup \t #{'# Upload only the revision file and nothing more'.grey}\n\n"
 		usage += "  -i, --ignore-include \t #{'# Ignore the files that are on your include list'.grey}\n\n"
 
 		usage += "Examples:\n"
