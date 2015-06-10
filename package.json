@@ -1,0 +1,36 @@
+{
+  "name": "dploy",
+  "version": "2.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "dploy": "./bin/dploy"
+  },
+  "engines": {
+    "iojs": ">= 2.0.x"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bluebird": "^2.9.27",
+    "chalk": "^1.0.0",
+    "cli-table": "^0.3.1",
+    "ftp": "^0.3.10",
+    "inquirer": "^0.8.5",
+    "lodash.foreach": "^3.0.3",
+    "lodash.merge": "^3.3.1",
+    "lodash.trimleft": "^3.0.2",
+    "lodash.uniq": "^3.2.1",
+    "map-files": "^0.7.4",
+    "micromatch": "^2.1.6",
+    "minimist": "^1.1.1",
+    "progress": "^1.1.8",
+    "ssh2": "^0.4.8",
+    "strftime": "^0.9.2",
+    "untildify": "^2.0.0",
+    "yamljs": "^0.2.3"
+  }
+}
