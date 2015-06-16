@@ -5,7 +5,7 @@ JavaScript ES6 is being used instead of CoffeeScript and all code is based on Pr
 
 More errors are being tracked, so now it's easier to test and debug problems.
 
-## (Breaking) Changes
+## (Breaking?) Changes
 As this is a major release, some things may break in your current workflow. This is a list of the changes you should be aware, and if you spot any other issues, please create a ticket on Github.
 
 ### privateKey, publicKey, passphrase, secure and secureOptions
@@ -62,6 +62,20 @@ Now you can have your config file on the YAML format (as before) or as JSON.
     </tr>
   </tbody>
 </table>
+
+
+### Override configs through the CLI
+Now you can pass more parameters to the CLI to override the parameters of your DPLOY config.
+
+Let's say you want to set the user and password dynamically:
+```sh
+dploy staging --user=your_username --pass=your_password
+```
+
+Or maybe set a different remote path?
+```sh
+dploy staging --path.remote=public_html/new_path/
+```
 
 
 ### Submodules

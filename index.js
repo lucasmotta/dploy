@@ -1,10 +1,10 @@
 'use strict';
 
-const Promise = require('bluebird');
-const minimist = require('minimist');
-const logger = require('./lib/logger');
-const config = require('./lib/config');
-const deploy = require('./lib/deploy');
+import Promise from 'bluebird';
+import minimist from 'minimist';
+import logger from './lib/logger';
+import config from './lib/config';
+import deploy from './lib/deploy';
 
 
 const args = minimist(process.argv.slice(2), {
@@ -30,13 +30,9 @@ const dploy = {
 
     }
 
-    const actions = envs.map(function(value) {
+    const actions = envs.map((value) => dploy.start(value));
 
-      return dploy.start(value);
-
-    });
-
-    Promise.reduce(actions, function(_, action) {
+    Promise.reduce(actions, (_, action) => {
 
       return action();
 
@@ -46,14 +42,10 @@ const dploy = {
 
   start(settings) {
 
-    return function() {
-
-      return deploy(settings);
-
-    };
+    return () => deploy(settings);
 
   }
 };
 
 
-module.exports = dploy.init;
+export default dploy.init;

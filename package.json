@@ -1,20 +1,28 @@
 {
   "name": "dploy",
   "version": "2.0.0-beta",
-  "description": "",
+  "author": "Lucas Motta <http://lucasmotta.com>",
+  "description": "Command line tool to deploy websites using FTP/SFTP and git.",
+  "keywords": [
+    "ftp",
+    "sftp",
+    "deploy",
+    "git"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LeanMeanFightingMachine/dploy"
+  },
   "main": "index.js",
   "bin": {
     "dploy": "./bin/dploy"
   },
   "engines": {
-    "iojs": ">= 2.0.x"
+    "node": ">=0.10.0"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel": "^5.5.8",
     "bluebird": "^2.9.27",
     "chalk": "^1.0.0",
     "cli-table": "^0.3.1",
