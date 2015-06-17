@@ -1,20 +1,10 @@
 'use strict';
 
+import args from './lib/args';
 import Promise from 'bluebird';
-import minimist from 'minimist';
 import logger from './lib/logger';
 import config from './lib/config';
 import deploy from './lib/deploy';
-
-
-const args = minimist(process.argv.slice(2), {
-  alias: {
-    'catchup': ['c'],
-    'help': ['h'],
-    'version': ['v'],
-    'includeFiles': ['i', 'include', 'include-files'],
-  }
-});
 
 
 const dploy = {
