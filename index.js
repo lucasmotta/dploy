@@ -20,9 +20,7 @@ const dploy = {
 
     }
 
-    const actions = envs.map((value) => dploy.start(value));
-
-    Promise.reduce(actions, (_, action) => {
+    Promise.reduce(envs.map((value) => dploy.start(value)), (_, action) => {
 
       return action();
 
