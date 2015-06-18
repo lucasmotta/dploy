@@ -33,7 +33,6 @@
     "lodash.iserror": "^3.0.1",
     "lodash.isstring": "^3.0.1",
     "lodash.merge": "^3.3.1",
-    "lodash.trimleft": "^3.0.2",
     "lodash.uniq": "^3.2.1",
     "map-files": "^0.7.4",
     "micromatch": "^2.1.6",
