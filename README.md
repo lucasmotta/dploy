@@ -69,7 +69,7 @@ server_name:
   user: <string>
   pass: <string>
   revision: <string> (.rev)
-  check: <boolean> (true)
+  confirm: <boolean> (true)
   path:
     local: <path>           # relative to your repository
     remote: <path>
@@ -118,11 +118,11 @@ But if we can't find any of those options, you will be prompted to type the pass
 
 To check the different between your local files and what's on the server, we have to create a temporary file with the reference of the last commit you've uploaded. This parameter defines the name of this file.
 
-### check
+### confirm
 * Type: `Boolean`  
 * Default: `true`  
 
-Will prompt you or not before actually uploading the files - this is on by default to avoid mistakes.
+Will prompt you before actually uploading the files - this is true by default to avoid mistakes.
 
 ### path.local
 * Type: `String`  

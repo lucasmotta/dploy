@@ -17,8 +17,9 @@ options:
   passphrase: secretpassphrase
 ```
 
-### check: true
-The check parameter is now set to `true` as default.
+### `check` is now `confirm` and its default value is `true`
+
+### `slots` and `branch` are now gone
 
 ### --ignore-include replaced by --include
 Note that now to upload the files inside the `include` option, you should set the `include` flag:
@@ -42,12 +43,12 @@ Now you can have your config file on the YAML format (as before) or as JSON.
     </tr>
     <tr>
       <td valign="top"><pre lang="yaml">server_name:
-  host: "ftp.myserver.com"
-  user: "user"
-  pass: "password"
+  host: ftp.myserver.com
+  user: user
+  pass: password
   path:
-    local: "www/"
-    remote: "public_html/"</pre></td>
+    local: www/
+    remote: public_html/</pre></td>
       <td valign="top"><pre lang="json">{
   "server_name": {
     "host": "ftp.myserver.com",

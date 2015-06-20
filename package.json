@@ -25,7 +25,6 @@
     "babel": "^5.5.8",
     "bluebird": "^2.9.27",
     "chalk": "^1.0.0",
-    "cli-table": "^0.3.1",
     "ftp": "^0.3.10",
     "inquirer": "^0.8.5",
     "lodash.foreach": "^3.0.3",
