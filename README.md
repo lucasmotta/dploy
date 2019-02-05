@@ -1,3 +1,5 @@
+![](https://img.shields.io/maintenance/no/2019.svg?style=flat)
+
 # DPLOY
 
 **DPLOY is an FTP/SFTP deployment tool built in node.js**  
